@@ -18,63 +18,101 @@ const io = new Server(server, {
 
 // maintain a list of active rooms
 const rooms = new Set();
+const adminToRoom = {};
+const playerToRoom = {};
+const roomToAdmin = {};
+const roomsData = {};
 
-// Admin - head of room
+//want a map [room]-> [admin, users, scores]
+io.on("connection", socket => {
+  //admin
 
-const adminNamespace = io.of("/admin");
-
-adminNamespace.on("connection", socket => {
-  let roomStarted = false;
-  let choiceCount = 0;
   socket.on("room-start", (room) => {
-    if (roomStarted) return;
+    let roomData = {
+      admin : socket.id,
+      usernames : {}
+    }
     socket.join(room);
     console.log(room);
 
     io.to(room).emit('Admin connected');
     if (rooms.has(room)) {
       socket.leave(room);
+      console.log('room name taken');
+      
     } else {
+      io.to(socket.id).emit('roomStartSuccess');
       rooms.add(room);
-      roomStarted = true;
-      console.log(socket.rooms);
+
+      //store in server
+      adminToRoom[socket.id] = room;
+      roomToAdmin[room] = socket.id;
+      roomsData[room] = roomData;
+
+      //console checks
+      console.log(roomsData);
     }
   });
 
-  socket.on('newUser', (username) => {
-    console.log('newUser recieved')
-    console.log('server recieved newUser with username: ' + username);
-    adminNamespace.to(room).emit('num-users', 100);
-  });
-
   socket.on('choice', () => {
-    if (!roomStarted) return;
     socket.of(playerNamespace).to(room).emit("choiceUpdate", ++choiceCount);
   });
 
   socket.on('disconnect', () => {
-    if (!roomStarted) return;
     console.log(socket.id);
-    console.log('room deleted');
-    rooms.delete(room);
-    console.log(rooms);
+    if (adminToRoom.hasOwnProperty(socket.id)) {
+      //admin - delete room
+      console.log('room deleted');
+      rooms.delete(adminToRoom[socket.id]);
+
+      //kick all players. 1: tell all to go to main screen 2: disconnect all from room 3: delete room data
+      io.to(adminToRoom[socket.id]).emit('roomClosed', adminToRoom[socket.id]);
+      io.in(adminToRoom[socket.id]).disconnectSockets();
+      delete roomsData[adminToRoom[socket.id]];
+
+      //delete server data
+      delete roomToAdmin[adminToRoom[socket.id]];
+      delete adminToRoom[socket.id];
+      console.log(rooms); 
+    } else {
+      //player - remove username, delete username from room if needed
+      console.log(roomsData);
+      room = playerToRoom[socket.id]
+      delete playerToRoom[socket.id]
+      if (roomsData.hasOwnProperty(room) && roomsData[room]['usernames'].hasOwnProperty(socket.id)) {
+        delete roomsData[room].usernames[socket.id]
+      }
+      console.log(roomsData);
+    }
   });
 
-});
-
-// User
-const playerNamespace = io.of("/player");
-
-playerNamespace.on("connection", socket => {
-  socket.on("join-room", (room, username) => {
+  //player
+  socket.on('tryRoom', (room) => {
     if (rooms.has(room)) {
-      //not working
-      socket.join(room);
-      adminNamespace.emit("newUser", username);
-      console.log("sucessfully joined room: " + room + " with username: " + username);
-      console.log(Object.keys(io.nsps));
+      io.to(socket.id).emit('roomExists');
+    }
+  })
+
+  socket.on("join-room", (room, username) => {
+    console.log(roomsData);
+    if (rooms.has(room)) {
+      if (roomsData[room].usernames.hasOwnProperty(username)) {
+        console.log("username taken!");
+      } else {
+        socket.join(room);
+        console.log("sucessfully joined room: " + room + " with username: " + username);
+        playerToRoom[socket.id] = room;
+        roomsData[room].usernames[socket.id] = username;
+        //old implementation
+        /*
+        usernames[socket.id] = username;
+        usernameSet.add(username);
+        */ 
+        io.to(room).emit("updateUserDisp", Array.from(Object.values(roomsData[room].usernames)));
+        io.to(socket.id).emit('joinApproved');
+      }
     } else {
-      console.log("tried to join an unitiated room, username: " + username);
+      console.log("tried to join an unitiated room, username: " + username); 
       console.log(rooms);
       console.log(room);
     }
