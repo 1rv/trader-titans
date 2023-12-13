@@ -5,8 +5,16 @@ import Button from 'react-bootstrap/Button';
 import logo from './logo.svg';
 import './App.css';
 
+//import components
+import Rules from './components/rules/rules.js';
+import Game from './components/game/game.js';
+
+
+//server
+
 import * as io from 'socket.io-client'
 const socket = io.connect("http://localhost:4000");
+
 
 
 function App() {
@@ -33,13 +41,17 @@ function App() {
   }
   
   const startGame = () => {
-    //start game
+    socket.emit('startGame');
+    socket.on('gameStartedAdmin', () => {
+      //don't start game if less than 2 players
+      setState(5);
+    });
   }
   const kickUser = () => {
-    //start game
+    //delete user for innapropriate name or something
   }
 
-  //States 0 - Default, 1 - admin waiting, 2 - player waiting (w/ name),  3 - player w/o name, 5 - admin playing, 6 - player playing
+  //States 0 - Default, 1 - admin waiting, 2 - player waiting (w/ name),  3 - player w/o name, 5 - admin playing, 6 - player playing (tightening), 7 - player playing (setting line), 8 - player playing (buy/sell)
   const [state, setState] = useState(0);
   const [username, setUsername] = useState('');
   const [code, setCode] = useState('');
@@ -55,6 +67,8 @@ function App() {
         <br></br>
         <Button variant="primary" onClick = {joinRoom}>Join Room</Button>
         <Button variant="primary" onClick = {createRoom}>Create Room</Button>
+        <br></br>
+        <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
   } else if (state == 1) {
     //admin
@@ -76,8 +90,13 @@ function App() {
         {userDisp}
         <br></br>
         <Button variant="primary" onClick = {startGame}>Start Game</Button>
+        <br></br>
+        <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
   } else if (state == 2) {
+    socket.on('gameStartedPlayer', () => {
+      setState(6);
+    });
     inputs = 
       <>
         See your name on the board? Get ready to play!
@@ -89,11 +108,15 @@ function App() {
         onChange={e=> setUsername(e.target.value)}
         />
         <Button variant="primary" onClick = {joinRoomFinal}>Join Room</Button>
+        <br></br>
+        <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
+  } else if (state === 6) {
+    inputs = <Game/>;
   }
 
   // admin left? return to main menu
-  if (state === 2 || state === 6 || state === 3) {
+  if (state === 2 || state === 6  || state === 3) {
     socket.on('roomClosed', () => {
       setState(0);
     });
@@ -102,11 +125,8 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <p>
           {inputs}
-          <br></br>
-          Play <code>Trader Titans</code>! Enter a game code or start a new game.
-        </p>
+        <Rules/>
       </header>
     </div>
   );

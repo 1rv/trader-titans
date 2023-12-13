@@ -26,11 +26,13 @@ const roomsData = {};
 //want a map [room]-> [admin, users, scores]
 io.on("connection", socket => {
   //admin
-
   socket.on("room-start", (room) => {
     let roomData = {
       admin : socket.id,
-      usernames : {}
+      usernames : {'' : ''}, //socket.it -> username. We don't want empty username, so ill just make it perma unavailable.
+      players : [],
+      started : false,
+      round : 0
     }
     socket.join(room);
     console.log(room);
@@ -51,6 +53,20 @@ io.on("connection", socket => {
 
       //console checks
       console.log(roomsData);
+      console.log(adminToRoom);
+    }
+  });
+
+  socket.on('startGame', () => {
+    let numPlayers = Object.keys(roomsData[adminToRoom[socket.id]].usernames).length;
+    if (numPlayers > 2) {
+      room = adminToRoom[socket.id]
+      io.to(socket.id).emit('gameStartedAdmin');
+      io.to(room).emit('gameStartedPlayer');
+      roomsData[room].started = true;
+      roomsData[room].round = 1;
+    } else {
+      console.log('too few players');
     }
   });
 
@@ -67,16 +83,18 @@ io.on("connection", socket => {
 
       //kick all players. 1: tell all to go to main screen 2: disconnect all from room 3: delete room data
       io.to(adminToRoom[socket.id]).emit('roomClosed', adminToRoom[socket.id]);
-      io.in(adminToRoom[socket.id]).disconnectSockets();
+      io.socketsLeave(adminToRoom[socket.id]);
       delete roomsData[adminToRoom[socket.id]];
 
       //delete server data
       delete roomToAdmin[adminToRoom[socket.id]];
       delete adminToRoom[socket.id];
-      console.log(rooms); 
+      /*
+      console.log(roomsData); 
+      console.log("deleted roomsData?");
+      */
     } else {
       //player - remove username, delete username from room if needed
-      console.log(roomsData);
       room = playerToRoom[socket.id]
       delete playerToRoom[socket.id]
       if (roomsData.hasOwnProperty(room) && roomsData[room]['usernames'].hasOwnProperty(socket.id)) {
@@ -96,7 +114,7 @@ io.on("connection", socket => {
   socket.on("join-room", (room, username) => {
     console.log(roomsData);
     if (rooms.has(room)) {
-      if (roomsData[room].usernames.hasOwnProperty(username)) {
+      if (Object.values(roomsData[room].usernames).includes(username)) {
         console.log("username taken!");
       } else {
         socket.join(room);
@@ -117,6 +135,8 @@ io.on("connection", socket => {
       console.log(room);
     }
   });
+
+  //player game logic things 
 });
 
 io.on("connection", (socket) => {
