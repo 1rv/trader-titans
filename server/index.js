@@ -25,6 +25,11 @@ const roomsData = {};
 
 //want a map [room]-> [admin, users, scores]
 io.on("connection", socket => {
+  //game/admin components
+  socket.on("requestRoom", (room) => {
+    socket.join(room)
+  });
+
   //admin
   socket.on("room-start", (room) => {
     let roomData = {
@@ -32,7 +37,11 @@ io.on("connection", socket => {
       usernames : {'' : ''}, //socket.it -> username. We don't want empty username, so ill just make it perma unavailable.
       players : [],
       started : false,
-      round : 0
+      biddingOpen : false,
+      round : 0,
+      spread : 0,
+      bidAsk : 0,
+      marketMaker : ''
     }
     socket.join(room);
     console.log(room);
@@ -41,13 +50,12 @@ io.on("connection", socket => {
     if (rooms.has(room)) {
       socket.leave(room);
       console.log('room name taken');
-      
     } else {
       io.to(socket.id).emit('roomStartSuccess');
       rooms.add(room);
 
       //store in server
-      adminToRoom[socket.id] = room;
+      adminToRoom[socket.id] = room; 
       roomToAdmin[room] = socket.id;
       roomsData[room] = roomData;
 
@@ -59,7 +67,7 @@ io.on("connection", socket => {
 
   socket.on('startGame', () => {
     let numPlayers = Object.keys(roomsData[adminToRoom[socket.id]].usernames).length;
-    if (numPlayers > 2) {
+    if (numPlayers > 1) {
       room = adminToRoom[socket.id]
       io.to(socket.id).emit('gameStartedAdmin');
       io.to(room).emit('gameStartedPlayer');
@@ -74,6 +82,15 @@ io.on("connection", socket => {
     socket.of(playerNamespace).to(room).emit("choiceUpdate", ++choiceCount);
   });
 
+  socket.on('startBidding', (adminId) => {
+    io.to(socket.id).emit('startBiddingAdmin');
+    room = adminToRoom[adminId];
+    io.to(room).emit('startBiddingPlayer');
+    roomsData[room].biddingOpen = true;
+    roomsData[room].spread = Number.MAX_SAFE_INTEGER;
+  });
+
+  //disconnection logic - both 
   socket.on('disconnect', () => {
     console.log(socket.id);
     if (adminToRoom.hasOwnProperty(socket.id)) {
@@ -137,6 +154,17 @@ io.on("connection", socket => {
   });
 
   //player game logic things 
+  socket.on('bid', (newSpread, username, room) => {
+    if (!roomsData[room].biddingOpen || newSpread > (0.9001*roomsData[room].spread)) {
+      //bidding closed or bid not small enough, throw a fit
+    } else {
+      //really we should update admin socketid and only send to that but whatever... Security second
+      console.log(username);
+      roomsData[room].spread = newSpread;
+      roomsData[room].marketMaker = username;
+      socket.to(room).emit('bidAccepted', newSpread, username);
+    }
+  }); 
 });
 
 io.on("connection", (socket) => {

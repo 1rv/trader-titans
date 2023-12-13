@@ -1,3 +1,4 @@
+import React from 'react';
 import { lazy, Suspense } from 'react';
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
@@ -8,6 +9,7 @@ import './App.css';
 //import components
 import Rules from './components/rules/rules.js';
 import Game from './components/game/game.js';
+import Admin from './components/admin/admin.js';
 
 
 //server
@@ -111,8 +113,23 @@ function App() {
         <br></br>
         <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
-  } else if (state === 6) {
-    inputs = <Game/>;
+  } else if (state === 5) {
+    //write better viariables. Find also a non bad solution for these guys
+    let a = <Admin />;
+    const a1 = React.cloneElement(a, {
+      id : socket.id,
+      room : code 
+    })
+    inputs = a1;
+  }
+  else if (state === 6) {
+    let g = <Game />;
+    const g1 = React.cloneElement(g, {
+      usn : username,
+      room : code,
+      id : socket.id
+    });
+    inputs = g1;
   }
 
   // admin left? return to main menu
