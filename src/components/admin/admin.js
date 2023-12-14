@@ -10,16 +10,21 @@ const socket = io.connect("http://localhost:4000");
 //import loading circle
 
 export default function Admin(props) {
-  //0: setting topic/start round, 1: waiting for bidding, 2: waiting for players to trade, 3: resolving price, 4: leaderboard
+  //0: setting topic/start round, 1: waiting for bidding, 2: waiting for players to setline/trade, 3: resolving price, 4: leaderboard
   //access admin's socketid with props.id
   //props.room for old room
   const [adminState, setAdminState] = useState(0);
-  const [buyPrice, setBuyPrice] = useState(0);
-  const [sellPrice, setSellPrice] = useState(0);
-  const [resolvePrice, setResolvePrice] = useState(0);
+  const [bidPrice, setBidPrice] = useState(0);
+  const [askPrice, setAskPrice] = useState(0);
   const [topic, setTopic] = useState(''); //local
   const [marketMaker, setMarketMaker] = useState('');
   const [spread, setSpread] = useState(Number.MAX_SAFE_INTEGER);
+  const [waitingFor, setWaitingFor] = useState('');
+  const [marketString, setMarketString] = useState('');
+  const [traderString, setTraderString] = useState('');
+  const [resolvePrice, setResolvePrice] = useState('');
+  const [topFive, setTopFive] = useState([]);
+  const [roundStats, setRoundStats] = useState([]); //[buys, sells, mmPnL]
   
   socket.emit("requestRoom", props.room);
 
@@ -30,9 +35,26 @@ export default function Admin(props) {
     });
   }
 
+  //update this to call+response later
+  const startLineSetting = () => {
+    socket.emit('startLineSetting', props.room);
+    socket.on('startLineSettingAdmin', () => {
+      setWaitingFor('Waiting for Market Maker...');
+      setAdminState(2);
+    });
+  }
+
+  const tradingDone = () => {
+    let rp = parseInt(resolvePrice);
+    if (!isNaN(rp)) {
+      socket.emit('tradingDone', rp, props.room);
+    }
+  }
+
 
   var display;
 
+  //0: setting topic/start round, 1: waiting for bidding, 2: waiting for players to setline/trade, 3: resolving price, 4: leaderboard
   if (adminState == 0) {
     display = 
       <>
@@ -50,22 +72,61 @@ export default function Admin(props) {
       <>
         <h1>Spread: <code>{spread}</code></h1>
         <h1>By: <code>{marketMaker}</code></h1>
+        <Button variant='primary' onClick = {startLineSetting}>Confirm Market Maker</Button>
       </>
   } else if (adminState == 2) {
+    socket.on('lineSetAdmin', (bid, ask) => {
+      setBidPrice(bid);
+      setAskPrice(ask);
+      setWaitingFor('Waiting for Traders...');
+      setMarketString("Market: "+ String(bid)+ "@" + String(ask));
+    });
+    socket.on('tradeRecievedAdmin', (tradesCt, traderCt) => {
+      setTraderString(tradesCt + " out of " + traderCt + " trades processed");
+    });
+    socket.on('roundResultsAdmin', (topFive, roundStats) => {
+      setTopFive(topFive);
+      setRoundStats(roundStats);
+      setAdminState(4);
+    });
     display = 
       <>
-        adminState2
+        <h1>{waitingFor}</h1>
+        <h2>{marketString}</h2>
+        <h2>{traderString}</h2>
+        <input id="Resolve Price" type="text" placeholder="Resolve Price" autoFocus='true' onChange={e=> setResolvePrice(e.target.value)}/> 
+        <Button variant="primary" onClick = {tradingDone}>Resolve</Button>
       </>
   } else if (adminState == 3) {
     display = 
       <>
-        adminState3
+        Waiting for trades to resolve... this shouldnt happen
       </>
   } else if (adminState == 4) {
-    display = 
+    console.log('admin POV topFive');
+    console.log(topFive)
+    //there must be a better way of doing this
+    display =
       <>
-        adminState4
+        <h1>Leaderboard</h1>
+        {topFive[0].username}:  {topFive[0].score}
+        <br></br>
+        {topFive[1].username}:  {topFive[1].score}
+        <br></br>
+        <br></br>
+        <h2>Round Stats:</h2>
+        buys: {roundStats[0]}
+        <br></br>
+        sells: {roundStats[1]}
+        <br></br>
+        Market Maker PnL: {roundStats[2]}
       </>
+    /*
+    for (let i = 0; i < topFive.length; i++) {
+      display += 
+        {topFive[i].username}
+        <br></br>
+    }*/
   }
 
   return (
