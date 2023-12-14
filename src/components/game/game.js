@@ -5,7 +5,9 @@ import Button from 'react-bootstrap/Button';
 import styled from 'styled-components';
 
 import * as io from 'socket.io-client';
-const socket = io.connect("http://localhost:4000");
+const socket = io.connect(
+  process.env.NODE_ENV === 'production' ? `${process.env.REACT_APP_SERVER_URL}` : 'http://localhost:4000'
+);
 
 //import loading circle
 
@@ -115,7 +117,7 @@ export default function Game(props) {
   } else if (gameState == 4) {
     display = 
       <>
-        Score: {myDiff}
+        Score Change: {myDiff}
       </>
   }
 
