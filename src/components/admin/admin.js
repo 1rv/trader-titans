@@ -51,6 +51,10 @@ export default function Admin(props) {
     }
   }
 
+  const restartRound = () => {
+    socket.emit('restartRound', props.room);
+  }
+
 
   var display;
 
@@ -70,6 +74,7 @@ export default function Admin(props) {
     });
     display = 
       <>
+        <h1>Topic: {topic}</h1>
         <h1>Spread: <code>{spread}</code></h1>
         <h1>By: <code>{marketMaker}</code></h1>
         <Button variant='primary' onClick = {startLineSetting}>Confirm Market Maker</Button>
@@ -91,6 +96,7 @@ export default function Admin(props) {
     });
     display = 
       <>
+        <h1>Topic: {topic}</h1>
         <h1>{waitingFor}</h1>
         <h2>{marketString}</h2>
         <h2>{traderString}</h2>
@@ -103,30 +109,101 @@ export default function Admin(props) {
         Waiting for trades to resolve... this shouldnt happen
       </>
   } else if (adminState == 4) {
-    console.log('admin POV topFive');
-    console.log(topFive)
+    socket.on('restartRoundAdmin', () => {
+      setTopic('');
+      setMarketMaker('');
+      setSpread(Number.MAX_SAFE_INTEGER);
+      setAdminState(0);
+      setTraderString('');
+      setMarketString('')
+    });
     //there must be a better way of doing this
-    display =
-      <>
-        <h1>Leaderboard</h1>
-        {topFive[0].username}:  {topFive[0].score}
-        <br></br>
-        {topFive[1].username}:  {topFive[1].score}
-        <br></br>
-        <br></br>
-        <h2>Round Stats:</h2>
-        buys: {roundStats[0]}
-        <br></br>
-        sells: {roundStats[1]}
-        <br></br>
-        Market Maker PnL: {roundStats[2]}
-      </>
-    /*
-    for (let i = 0; i < topFive.length; i++) {
-      display += 
-        {topFive[i].username}
-        <br></br>
-    }*/
+    let n = topFive.length;
+    if (n == 2) {
+      display =
+        <>
+          <h1>Leaderboard</h1>
+          {topFive[0].username}:  {topFive[0].score}
+          <br></br>
+          {topFive[1].username}:  {topFive[1].score}
+          <br></br>
+          <br></br>
+          <h2>Round Stats:</h2>
+          buys: {roundStats[0]}
+          <br></br>
+          sells: {roundStats[1]}
+          <br></br>
+          Market Maker ({marketMaker}) PnL: {roundStats[2]}
+          <br></br>
+          <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+        </>
+    } else if (n == 3) {
+      display =
+        <>
+          <h1>Leaderboard</h1>
+          {topFive[0].username}:  {topFive[0].score}
+          <br></br>
+          {topFive[1].username}:  {topFive[1].score}
+          <br></br>
+          {topFive[2].username}:  {topFive[2].score}
+          <br></br>
+          <br></br>
+          <h2>Round Stats:</h2>
+          buys: {roundStats[0]}
+          <br></br>
+          sells: {roundStats[1]}
+          <br></br>
+          Market Maker ({marketMaker}) PnL: {roundStats[2]}
+          <br></br>
+          <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+        </>
+    } else if (n == 4) {
+      display =
+        <>
+          <h1>Leaderboard</h1>
+          {topFive[0].username}:  {topFive[0].score}
+          <br></br>
+          {topFive[1].username}:  {topFive[1].score}
+          <br></br>
+          {topFive[2].username}:  {topFive[2].score}
+          <br></br>
+          {topFive[3].username}:  {topFive[3].score}
+          <br></br>
+          <br></br>
+          <h2>Round Stats:</h2>
+          buys: {roundStats[0]}
+          <br></br>
+          sells: {roundStats[1]}
+          <br></br>
+          Market Maker ({marketMaker}) PnL: {roundStats[2]}
+          <br></br>
+          <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+        </>
+    } else {
+      display =
+        <>
+          <h1>Leaderboard</h1>
+          {topFive[0].username}:  {topFive[0].score}
+          <br></br>
+          {topFive[1].username}:  {topFive[1].score}
+          <br></br>
+          {topFive[2].username}:  {topFive[2].score}
+          <br></br>
+          {topFive[3].username}:  {topFive[3].score}
+          <br></br>
+          {topFive[4].username}:  {topFive[4].score}
+          <br></br>
+          <br></br>
+          <h2>Round Stats:</h2>
+          buys: {roundStats[0]}
+          <br></br>
+          sells: {roundStats[1]}
+          <br></br>
+          Market Maker ({marketMaker}) PnL: {roundStats[2]}
+          <br></br>
+          <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+        </>
+    }
   }
 
   return (

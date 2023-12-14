@@ -115,6 +115,13 @@ export default function Game(props) {
         Waiting for {waitingFor}...
       </>;
   } else if (gameState == 4) {
+    socket.on('restartRoundPlayer', () => {
+      setWaitingFor('round');
+      setMyBidPrice(NaN);
+      setMyAskPrice(NaN);
+      setMySpread('');
+      setGameState(3);
+    });
     display = 
       <>
         Score Change: {myDiff}

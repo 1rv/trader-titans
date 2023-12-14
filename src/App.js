@@ -51,6 +51,8 @@ function App() {
       setState(5);
     });
   }
+
+  //implement this
   const kickUser = () => {
     //delete user for innapropriate name or something
   }

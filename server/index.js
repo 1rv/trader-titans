@@ -289,6 +289,20 @@ io.on("connection", socket => {
     socket.emit('roundResultsAdmin', topFive.slice(0, Math.min(topFive.length, 5)), [buys, sells, mmdiff]);
     console.log(topFive.slice(0, Math.min(topFive.length, 5)))
   });
+
+  socket.on('restartRound', (room) => {
+    //change variables
+    let n = roomsData[room].leaderboard.length
+    roomsData[room].playerTrades = new Array(n).fill(0);
+    roomsData[room].playerScores = new Array(n).fill(0);
+    roomsData[room].round += 1;
+    roomsData[room].marketMaker = '';
+    roomsData[room].tradesCt = 0;
+
+    //emit to users
+    io.to(socket.id).emit('restartRoundAdmin');
+    io.to(room).emit('restartRoundPlayer');
+  });
 });
 
 io.on("connection", (socket) => {
