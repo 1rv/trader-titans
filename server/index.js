@@ -309,6 +309,6 @@ io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 });
 
-server.listen(4000, () => {
-  console.log('server running on Port 4000');
+server.listen(process.env.PORT || 4000, () => {
+  console.log('server running');
 });
