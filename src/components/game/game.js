@@ -1,6 +1,9 @@
 import { MouseEventHandler } from 'react';
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
+import React from 'react';
+
+import Scorebar from '../scorebar/scorebar.js';
 
 import styled from 'styled-components';
 
@@ -67,26 +70,26 @@ export default function Game(props) {
       setGameState(3);
     });
     display =
-      <>
+      <p>
         <h1>Bid:</h1>
         <input id="newSpread" type="text" placeholder="your bid" autoFocus='true' value={mySpread} onChange={e=> setMySpread(e.target.value)}/>
         <Button variant="primary" onClick = {bid}>Bid</Button>
-      </>
+      </p>
   } else if (gameState == 1) {
     //officially the market maker
     //fix this with parseint.
     socket.on('marketMakerLineConfirmed', () => {
       setMyBidPrice(NaN);
       setMyAskPrice(NaN);
-      setWaitingFor('traders');
+      setWaitingFor('traders on your market');
       setGameState(3);
     });
     display = 
-      <>
+      <p>
         <h1>{myBidPrice} @ {myAskPrice}</h1>
         <input id="Bid Price" type="text" placeholder="Bid Price" autoFocus='true' onChange={e=> updateLine(e.target.value)}/> 
         <Button variant="primary" onClick = {setLine}>Confirm</Button>
-      </>
+      </p>
   } else if (gameState == 2) {
     //buying and selling
     socket.on('tradeRecievedPlayer', () => {
@@ -94,26 +97,29 @@ export default function Game(props) {
       setGameState(3);
     });
     display = 
-      <>
+      <p>
         <Button variant="primary" onClick = {playerSell}>Sell</Button>
         <Button variant="primary" onClick = {playerBuy}>Buy</Button>
-      </>
+      </p>
   } else if (gameState == 3) {
     //waiting room
-    socket.on('startBuySellPlayer', () => {
-      setGameState(2);
+    socket.on('startBuySellPlayer', (mm) => {
+      if(mm != props.usn) {
+        setGameState(2);
+      }
     });
     socket.on('startBiddingPlayer', () => {
       setGameState(0);
     });
     socket.on('roundResultsPlayer', (usnDiff) => {
       setMyDiff(usnDiff[props.usn]);
+      setScore(score+myDiff);
       setGameState(4);
     });
     display = 
-      <>
+      <p>
         Waiting for {waitingFor}...
-      </>;
+      </p>;
   } else if (gameState == 4) {
     socket.on('restartRoundPlayer', () => {
       setWaitingFor('round');
@@ -123,12 +129,16 @@ export default function Game(props) {
       setGameState(3);
     });
     display = 
-      <>
+      <p>
         Score Change: {myDiff}
-      </>
+      </p>
   }
 
+
   return (
-    display
+    <>
+      {display}
+      <Scorebar scr={score} usn={props.usn}/>
+    </>
   )
 }

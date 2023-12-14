@@ -211,7 +211,7 @@ io.on("connection", socket => {
     } else {
       io.to(roomsData[room].marketMakerId).emit('marketMakerLineConfirmed');
       io.to(room).emit('lineSetAdmin', bidPrice, askPrice);
-      socket.broadcast.to(room).emit('startBuySellPlayer');
+      socket.broadcast.to(room).emit('startBuySellPlayer', roomsData[room].marketMaker);
       roomsData[room].bid = bidPrice;
       roomsData[room].ask = askPrice;
     }

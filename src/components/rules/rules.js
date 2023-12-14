@@ -16,7 +16,7 @@ export default function Rules() {
 
   return (
     <>
-      <ButtonContainer src={qIcon} alt='' height='100' width='100' onClick={toggleRules} />
+      <ButtonContainer src={qIcon} alt='' height='75' width='75' onClick={toggleRules} />
       {isOpen ? (
         <> 
           <RulesContainer>
@@ -42,7 +42,7 @@ export default function Rules() {
 const ButtonContainer = styled.img`
   @media (min-width: 400px) {
     position: absolute;
-    bottom: 3rem;
+    top: 3rem;
     right: 3rem;
     transition: transform .2s;
   }
@@ -75,6 +75,7 @@ const RulesContainer = styled.div`
   padding-inline: 2rem;
   width: 35rem;
   height: 45rem;
+  z-index:100;
 
   p {
     font-size: 3rem;
