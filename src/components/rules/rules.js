@@ -16,7 +16,7 @@ export default function Rules() {
 
   return (
     <>
-      <ButtonContainer src={qIcon} alt='' height='75' width='75' onClick={toggleRules} />
+      <ButtonContainer src={qIcon} alt='' height='8%' width='8%' onClick={toggleRules} />
       {isOpen ? (
         <> 
           <RulesContainer>
@@ -31,7 +31,7 @@ export default function Rules() {
             <h3>Stage 3: Trading</h3>
             <h4>The remaining players will trade against the market maker, either 'selling' at price <code>x</code> or 'buying' at price <code>y</code>.</h4>
             <h3>Stage 4: Resolution</h3>
-            <h4>The admin will enter the resolution price <code>r</code>, the <b>actual result of the question</b>. Sellers will purchase at price <code>r</code> and sell at <code>x</code>, and make profit if <code>r &lt; x</code>. Buyers will purchase at price <code>y</code> and sell at <code>r</code>, and make profit if <code> y &lt; r</code>, and therefore the market maker will take profit when the opposite happens. If <code>x &lt; r &lt; y</code>, no trader can make profit, and the market maker will win every trade! </h4>
+            <h4>The admin will enter the resolution price <code>r</code>, the <b>actual result of the question</b>. Sellers will purchase at price <code>r</code> and sell at <code>x</code>, and make profit when <code>r &lt; x</code>. Buyers will purchase at price <code>y</code> and sell at <code>r</code>, and make profit if <code> y &lt; r</code>, and therefore the market maker will take profit when the opposite happens. If <code>x &lt; r &lt; y</code>, no trader can make profit, and the market maker will win every trade! </h4>
           </RulesContainer>
         </>
       ) : (<> </>)}
@@ -42,8 +42,8 @@ export default function Rules() {
 const ButtonContainer = styled.img`
   @media (min-width: 400px) {
     position: absolute;
-    top: 3rem;
-    right: 3rem;
+    top: 4%;
+    right: 2%;
     transition: transform .2s;
   }
 

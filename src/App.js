@@ -92,12 +92,12 @@ function App() {
     });
     inputs = 
       <>
+        <h1>Game Code: {code}</h1><br></br>
         <h1>Players:</h1><br></br>
         {userDisp}
         <br></br>
         <Button variant="primary" onClick = {startGame}>Start Game</Button>
         <br></br>
-        <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
   } else if (state == 2) {
     socket.on('gameStartedPlayer', () => {
