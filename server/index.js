@@ -4,7 +4,11 @@ const cors = require('cors');
 
 // Create express app
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin:'https://trader-titans-061579df4c4c.herokuapp.com/',
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+  credentials: true, // Enable credentials (if needed)
+}));
 
 // Server
 const http = require('http');
@@ -13,7 +17,6 @@ const server = http.createServer(app)
 const io = new Server(server, {
   cors: {
     origin: "*",
-    Access-Control-Allow-Origin: "https://trader-titans-061579df4c4c.herokuapp.com/"
   },
 });
 
