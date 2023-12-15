@@ -4,9 +4,9 @@ This project was inspired by trading game I played at Maroon Capital at UChicago
 
 This is my first webapp I've written, much of the code should be refactored, and some of the game/server communication is somewhat clunky, but should be fixed relatively soon. Similarly, the graphics of this game are very much in progress.
 
-![](./screenshots/admin1.jpg)
-![](./screenshots/player1.jpg)
-![](./screenshots/rules1.jpg)
+![](./screenshots/admin1.png)
+![](./screenshots/player1.png)
+![](./screenshots/rules1.png)
 
 ## Links
 - Live Deployment via [Heroku](https://trader-titans-061579df4c4c.herokuapp.com/)
