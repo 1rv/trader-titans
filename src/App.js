@@ -11,6 +11,8 @@ import Rules from './components/rules/rules.js';
 import Game from './components/game/game.js';
 import Admin from './components/admin/admin.js';
 
+import githubIcon from './assets/github-mark.svg';
+
 
 //server
 
@@ -71,8 +73,10 @@ function App() {
         <input id="code" type="text" placeholder="type room code" autoFocus='true' value={code} onChange={e=> setCode(e.target.value)}
         />
         <br></br>
-        <Button variant="primary" onClick = {joinRoom}>Join Room</Button>
+        <span class='nowrap'>
+        <Button variant="primary" onClick = {joinRoom} >Join Room</Button>
         <Button variant="primary" onClick = {createRoom}>Create Room</Button>
+        </span>
         <br></br>
         <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
@@ -148,6 +152,7 @@ function App() {
       <header className="App-header">
           {inputs}
         <Rules/>
+        <a href="https://github.com/1rv/trader-titans" style={{ position: 'absolute', top: '4%', left: '2%' }}><img src={githubIcon} height='75%' width='75%'/></a>
       </header>
     </div>
   );
