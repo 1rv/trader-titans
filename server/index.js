@@ -13,6 +13,7 @@ const server = http.createServer(app)
 const io = new Server(server, {
   cors: {
     origin: "*",
+    Access-Control-Allow-Origin: "https://trader-titans-061579df4c4c.herokuapp.com/"
   },
 });
 
