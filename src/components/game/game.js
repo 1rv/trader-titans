@@ -54,7 +54,7 @@ export default function Game(props) {
     socket.emit('playerTrade', 'buy', props.usn, props.room);
   }
   const playerSell = () => {
-    socket.emit('playerTrade', 'buy', props.usn, props.room);
+    socket.emit('playerTrade', 'sell', props.usn, props.room);
   }
 
   var display;
@@ -113,7 +113,7 @@ export default function Game(props) {
     });
     socket.on('roundResultsPlayer', (usnDiff) => {
       setMyDiff(usnDiff[props.usn]);
-      setScore(score+myDiff);
+      setScore(score+parseInt(myDiff));
       setGameState(4);
     });
     display = 
