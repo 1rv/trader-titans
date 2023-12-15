@@ -1,12 +1,14 @@
 # Trader Titans
 
+You can play the game [here](https://trader-titans-061579df4c4c.herokuapp.com/).
+
 This project was inspired by trading game I played at Maroon Capital at UChicago, developed as my Winter Break 2023 project. We used an extremely clunky spreadsheet to play the game, whereas an online implementation that functions similarly to Kahoot or Quiplash would feel much smoother.
 
 This is my first webapp I've written, much of the code should be refactored, and some of the game/server communication is somewhat clunky, but should be fixed relatively soon. Similarly, the graphics of this game are very much in progress.
 
 ![](./screenshots/admin1.png)
 ![](./screenshots/player1.png)
-![](./screenshots/rules1.png)
+![](./screenshots/rules.png)
 
 ## Links
 - Live Deployment via [Heroku](https://trader-titans-061579df4c4c.herokuapp.com/)
