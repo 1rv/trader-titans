@@ -29,7 +29,7 @@ export default function Game(props) {
   const [mySpread, setMySpread] = useState('');
   const [officialSpread, setOfficialSpread] = useState(0);
   const [waitingFor, setWaitingFor] = useState('round');
-  const [myDiff, setMyDiff] = useState('round');
+  const [myDiff, setMyDiff] = useState(0);
 
   socket.emit("requestRoom", props.room);
 
@@ -113,7 +113,9 @@ export default function Game(props) {
     });
     socket.on('roundResultsPlayer', (usnDiff) => {
       setMyDiff(usnDiff[props.usn]);
-      setScore(score+parseInt(myDiff));
+      //setScore(score+usnDiff[props.usn]); no idea why but this doens't work
+      let t = score+usnDiff[props.usn];
+      setScore(t);
       setGameState(4);
     });
     display = 

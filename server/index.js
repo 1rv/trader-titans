@@ -231,7 +231,7 @@ io.on("connection", socket => {
     if (type == 'buy') {
       roomsData[room].playerTrades[playerId] = 1 //1 - buy
     } else if (type == 'sell') {
-      roomsData[room].playerTrades[playerId] - 2 //2 - sell
+      roomsData[room].playerTrades[playerId] = 2 //2 - sell
     } else {
       //something really wrong has happened. Throw an error?
     }
@@ -271,7 +271,7 @@ io.on("connection", socket => {
         //didn't play... lose 5%
         roomsData[room].leaderboard[i].score -= (roomsData[room].spread*0.05);
         roomsData[room].playerScores[i] -= (roomsData[room].spread*0.05);
-        diffs[i] = roomsData[room].spread*0.05;
+        diffs[i] = (-1)*roomsData[room].spread*0.05;
       }
     }
     roomsData[room].leaderboard[mmId].score += mmdiff;
@@ -291,7 +291,7 @@ io.on("connection", socket => {
     //change these to be to the room
     io.to(room).emit('roundResultsPlayer', usnDiff);
     socket.emit('roundResultsAdmin', topFive.slice(0, Math.min(topFive.length, 5)), [buys, sells, mmdiff]);
-    console.log(topFive.slice(0, Math.min(topFive.length, 5)))
+    console.log(topFive.slice(0, Math.min(topFive.length, 5)));
   });
 
   socket.on('restartRound', (room) => {
