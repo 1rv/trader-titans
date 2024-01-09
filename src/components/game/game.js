@@ -22,7 +22,7 @@ export default function Game(props) {
   //this actually sucks and I should figure out a better way to do this
   const [gameState, setGameState] = useState(3);
   const [bidPrice, setBidPrice] = useState(0);
-  const [AskPrice, setAskPrice] = useState(0);
+  const [askPrice, setAskPrice] = useState(0);
   const [myBidPrice, setMyBidPrice] = useState(NaN);
   const [myAskPrice, setMyAskPrice] = useState(NaN);
   const [score, setScore] = useState(0);
@@ -32,7 +32,8 @@ export default function Game(props) {
   const [myDiff, setMyDiff] = useState(0);
 
   socket.emit("requestRoom", props.room);
-
+  
+  //trade parseInt for parseDouble
   const bid = () => {
     if (isNaN(parseInt(mySpread))) return; //entered not a number somehow
     socket.emit('bid', parseInt(mySpread), props.usn, props.room);
@@ -98,14 +99,19 @@ export default function Game(props) {
     });
     display = 
       <p>
+        <h2>{bidPrice}@{askPrice}</h2>
+        (You can <b>sell to</b> the market maker at {bidPrice} or <b>buy from</b> the market maker at {askPrice})
+        <br></br>
         <Button variant="primary" onClick = {playerSell}>Sell</Button>
         <Button variant="primary" onClick = {playerBuy}>Buy</Button>
       </p>
   } else if (gameState == 3) {
     //waiting room
-    socket.on('startBuySellPlayer', (mm) => {
+    socket.on('startBuySellPlayer', (mm, bid, ask) => {
       if(mm != props.usn) {
         setGameState(2);
+        setBidPrice(bid)
+        setAskPrice(ask)
       }
     });
     socket.on('startBiddingPlayer', () => {

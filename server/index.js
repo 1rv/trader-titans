@@ -5,9 +5,8 @@ const cors = require('cors');
 // Create express app
 const app = express();
 app.use(cors({
-  origin:'https://trader-titans-061579df4c4c.herokuapp.com/',
+  origin: process.env.NODE_ENV === 'production' ? 'https://trader-titans-061579df4c4c.herokuapp.com/' : 'http://localhost:3000',
   methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-  credentials: true, // Enable credentials (if needed)
 }));
 
 // Server
@@ -215,7 +214,7 @@ io.on("connection", socket => {
     } else {
       io.to(roomsData[room].marketMakerId).emit('marketMakerLineConfirmed');
       io.to(room).emit('lineSetAdmin', bidPrice, askPrice);
-      socket.broadcast.to(room).emit('startBuySellPlayer', roomsData[room].marketMaker);
+      socket.broadcast.to(room).emit('startBuySellPlayer', roomsData[room].marketMaker, bidPrice, askPrice);
       roomsData[room].bid = bidPrice;
       roomsData[room].ask = askPrice;
     }

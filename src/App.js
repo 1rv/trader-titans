@@ -8,15 +8,18 @@ import './App.css';
 
 //import components
 import Rules from './components/rules/rules.js';
-import Game from './components/game/game.js';
-import Admin from './components/admin/admin.js';
 
 import githubIcon from './assets/github-mark.svg';
+
+import * as io from 'socket.io-client'
+
+//lazy load game/admin components
+const Game = lazy(() => import('./components/game/game.js'));
+const Admin = lazy(() => import('./components/admin/admin.js'));
 
 
 //server
 
-import * as io from 'socket.io-client'
 const socket = io.connect(
   process.env.NODE_ENV === 'production' ? `${process.env.REACT_APP_SERVER_URL}` : 'http://localhost:4000'
 );
@@ -122,22 +125,21 @@ function App() {
         <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
   } else if (state === 5) {
-    //write better viariables. Find also a non bad solution for these guys
-    let a = <Admin />;
-    const a1 = React.cloneElement(a, {
-      id : socket.id,
-      room : code 
-    })
-    inputs = a1;
+    inputs = <Suspense fallback = {<p>Loading...</p>}>
+      <Admin 
+        room={code}
+        id={socket.id}
+      />
+    </Suspense>;
   }
   else if (state === 6) {
-    let g = <Game />;
-    const g1 = React.cloneElement(g, {
-      usn : username,
-      room : code,
-      id : socket.id
-    });
-    inputs = g1;
+    inputs = <Suspense fallback = {<p>Loading...</p>}>
+      <Game 
+        usn={username}
+        room={code}
+        id={socket.id}
+      />
+    </Suspense>;
   }
 
   // admin left? return to main menu
