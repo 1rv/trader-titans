@@ -11,7 +11,7 @@ This is my first webapp I've written, much of the code should be refactored, and
 ![](./screenshots/rules.png)
 
 ## Links
-- Live Deployment via [Heroku](https://trader-titans-061579df4c4c.herokuapp.com/)
+- Live Deployment via Heroku (server side) and [Netlify](https://tradertitans.netlify.app/)
 
 ## Project Details
 This project is built with
