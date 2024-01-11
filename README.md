@@ -1,6 +1,6 @@
 # Trader Titans
 
-You can play the game [here](https://trader-titans.netlify.app/).
+You can play the game [here](https://tradertitans.netlify.app/).
 
 This project was inspired by trading game I played at Maroon Capital at UChicago, developed as my Winter Break 2023 project. We used an extremely clunky spreadsheet to play the game, whereas an online implementation that functions similarly to Kahoot or Quiplash would feel much smoother.
 
