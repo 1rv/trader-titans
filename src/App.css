@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+.underline-on-hover {
+  text-decoration: none;
+}
+
+.underline-on-hover:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}

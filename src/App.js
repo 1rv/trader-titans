@@ -58,8 +58,10 @@ function App() {
   }
 
   //implement this
-  const kickUser = () => {
+  const kickPlayer = (id) => {
     //delete user for innapropriate name or something
+    socket.emit('kickPlayer', id);
+    console.log('kickPlayer', id);
   }
 
   //States 0 - Default, 1 - admin waiting, 2 - player waiting (w/ name),  3 - player w/o name, 5 - admin playing, 6 - player playing (tightening), 7 - player playing (setting line), 8 - player playing (buy/sell)
@@ -88,14 +90,23 @@ function App() {
     socket.on('updateUserDisp', users => {
       //not a good solution
       //if nothing, do nothing
-      if (users.length == 0) return;
-      //otherwise display all names
-      let disp = '';
-
-      for (const username of users) {
-        disp += username + ' '
+      if (users.length == 0) {
+        setUserDisp();
       }
-      setUserDisp(disp);
+      //otherwise display all names
+      // Create an array of JSX elements for each username
+      const userElements = users.map((userData, index) => (
+        
+        <span 
+          key={index} 
+          className="underline-on-hover" 
+          onClick = {() => kickPlayer(userData[0])}
+        > 
+          {userData[1]} 
+        </span>
+      ));
+    
+      setUserDisp(userElements);
     });
     inputs = 
       <>
@@ -141,6 +152,13 @@ function App() {
       />
     </Suspense>;
   }
+
+  socket.on('kickPlayer', (id) => {
+    console.log('kick?', id)
+    if (id == socket.id) {
+      setState(0);
+    }
+  });
 
   // admin left? return to main menu
   if (state === 2 || state === 6  || state === 3) {
