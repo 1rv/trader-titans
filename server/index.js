@@ -17,6 +17,7 @@ const io = new Server(server, {
   cors: {
     origin: "*",
   },
+  connctionStateRecovery: {}
 });
 
 // maintain a list of active rooms
@@ -117,7 +118,7 @@ io.on("connection", socket => {
   });
 
   //disconnection logic - both 
-  socket.on('disconnect', () => {
+  socket.on('disconnect', (reason) => {
     console.log(socket.id);
     if (adminToRoom.hasOwnProperty(socket.id)) {
       //admin - delete room
@@ -138,13 +139,15 @@ io.on("connection", socket => {
       */
     } else {
       //player - remove username, delete username from room if needed
+      //check if disconnection is made forced, or if timeout reached on heartbeat
       room = playerToRoom[socket.id]
       delete playerToRoom[socket.id]
       if (roomsData.hasOwnProperty(room) && roomsData[room]['usernames'].hasOwnProperty(socket.id)) {
         delete roomsData[room].usernames[socket.id]
-        roomsData[room].traderCt -= 1;
+        roomsData[room].traderCt = usernames.length-1;
+        console.log("client disconnect: ", roomsData[room].usernames[socket.id]);
       }
-      console.log(roomsData);
+      console.log(reason);
     }
   });
 
