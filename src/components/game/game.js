@@ -1,11 +1,8 @@
-import { MouseEventHandler } from 'react';
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import React from 'react';
 
 import Scorebar from '../scorebar/scorebar.js';
-
-import styled from 'styled-components';
 
 import * as io from 'socket.io-client';
 const socket = io.connect(
@@ -61,7 +58,7 @@ export default function Game(props) {
   var display;
 
   //0: bidding down spread, 1: setting line, 2: buy/selling, 3: waiting for various things, 4: leaderboard
-  if (gameState == 0) {
+  if (gameState === 0) {
     socket.on('startLineSettingMarketMaker', (spread) => {
       setOfficialSpread(spread);
       setGameState(1);
@@ -76,7 +73,7 @@ export default function Game(props) {
         <input id="newSpread" type="text" placeholder="your bid" autoFocus='true' value={mySpread} onChange={e=> setMySpread(e.target.value)}/>
         <Button variant="primary" onClick = {bid}>Bid</Button>
       </p>
-  } else if (gameState == 1) {
+  } else if (gameState === 1) {
     //officially the market maker
     //fix this with parseint.
     socket.on('marketMakerLineConfirmed', () => {
@@ -91,7 +88,7 @@ export default function Game(props) {
         <input id="Bid Price" type="text" placeholder="Bid Price" autoFocus='true' onChange={e=> updateLine(e.target.value)}/> 
         <Button variant="primary" onClick = {setLine}>Confirm</Button>
       </p>
-  } else if (gameState == 2) {
+  } else if (gameState === 2) {
     //buying and selling
     socket.on('tradeRecievedPlayer', () => {
       setWaitingFor('other traders');
@@ -105,10 +102,10 @@ export default function Game(props) {
         <Button variant="primary" onClick = {playerSell}>Sell</Button>
         <Button variant="primary" onClick = {playerBuy}>Buy</Button>
       </p>
-  } else if (gameState == 3) {
+  } else if (gameState === 3) {
     //waiting room
     socket.on('startBuySellPlayer', (mm, bid, ask) => {
-      if(mm != props.usn) {
+      if(mm !== props.usn) {
         setGameState(2);
         setBidPrice(bid)
         setAskPrice(ask)
@@ -128,7 +125,7 @@ export default function Game(props) {
       <p>
         Waiting for {waitingFor}...
       </p>;
-  } else if (gameState == 4) {
+  } else if (gameState === 4) {
     socket.on('restartRoundPlayer', () => {
       setWaitingFor('round');
       setMyBidPrice(NaN);
