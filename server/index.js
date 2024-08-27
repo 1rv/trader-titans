@@ -139,13 +139,15 @@ io.on("connection", socket => {
       */
     } else {
       //player - remove username, delete username from room if needed
-      //check if disconnection is made forced, or if timeout reached on heartbeat
-      room = playerToRoom[socket.id]
-      delete playerToRoom[socket.id]
-      if (roomsData.hasOwnProperty(room) && roomsData[room]['usernames'].hasOwnProperty(socket.id)) {
-        delete roomsData[room].usernames[socket.id]
-        roomsData[room].traderCt = usernames.length-1;
-        console.log("client disconnect: ", roomsData[room].usernames[socket.id]);
+      //I suspect mobile clients are disconnecting due to transport problems - in this case do not remove
+      if(reason !== "transport close" || reason !== "transport error") {
+        room = playerToRoom[socket.id]
+        delete playerToRoom[socket.id]
+        if (roomsData.hasOwnProperty(room) && roomsData[room]['usernames'].hasOwnProperty(socket.id)) {
+          delete roomsData[room].usernames[socket.id]
+          roomsData[room].traderCt = usernames.length-1;
+          console.log("client disconnect: ", roomsData[room].usernames[socket.id]);
+        }
       }
       console.log(reason);
     }
