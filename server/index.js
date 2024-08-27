@@ -148,6 +148,20 @@ io.on("connection", socket => {
     }
   });
 
+  socket.on('kickPlayer', (id) => {
+    room = playerToRoom[id]
+    delete playerToRoom[id]
+    if (roomsData.hasOwnProperty(room) && roomsData[room]['usernames'].hasOwnProperty(id)) {
+      delete roomsData[room].usernames[id]
+      roomsData[room].traderCt -= 1;
+    }
+    io.to(room).emit('kickPlayer', id);
+    console.log(roomsData[room].usernames);
+    io.to(room).emit("updateUserDisp", Array.from(Object.entries(roomsData[room].usernames)));
+  });
+
+
+
   //player
   socket.on('tryRoom', (room) => {
     if (rooms.has(room)) {
@@ -157,7 +171,7 @@ io.on("connection", socket => {
 
   socket.on("join-room", (room, username) => {
     console.log(roomsData);
-    if (username == '') return;
+    if (username === '') return;
     if (rooms.has(room)) {
       if (Object.values(roomsData[room].usernames).includes(username)) {
         console.log("username taken!");
@@ -171,7 +185,7 @@ io.on("connection", socket => {
         usernames[socket.id] = username;
         usernameSet.add(username);
         */ 
-        io.to(room).emit("updateUserDisp", Array.from(Object.values(roomsData[room].usernames)));
+        io.to(room).emit("updateUserDisp", Array.from(Object.entries(roomsData[room].usernames)));
         io.to(socket.id).emit('joinApproved');
       }
     } else {
@@ -227,9 +241,9 @@ io.on("connection", socket => {
 
     let playerId = roomsData[room].usernameToGameId[username] //index of player
     if (roomsData[room].playerTrades[playerId] != 0) return; //already made a trade! reject it
-    if (type == 'buy') {
+    if (type === 'buy') {
       roomsData[room].playerTrades[playerId] = 1 //1 - buy
-    } else if (type == 'sell') {
+    } else if (type === 'sell') {
       roomsData[room].playerTrades[playerId] = 2 //2 - sell
     } else {
       //something really wrong has happened. Throw an error?
@@ -248,9 +262,9 @@ io.on("connection", socket => {
     let buys = 0;
     let sells = 0;
     for (let i = 0; i < roomsData[room].playerTrades.length; i++) { //playerTrades length should be same as leaderboard...
-      if (i == roomsData[room].usernameToGameId[roomsData[room].marketMaker]) {
+      if (i === roomsData[room].usernameToGameId[roomsData[room].marketMaker]) {
         mmId = i;
-      } else if (roomsData[room].playerTrades[i] == 1) { //Buys
+      } else if (roomsData[room].playerTrades[i] === 1) { //Buys
         let pnl = resolvePrice - roomsData[room].ask;
         roomsData[room].leaderboard[i].score += pnl;
         //may not need this next line
@@ -258,7 +272,7 @@ io.on("connection", socket => {
         mmdiff -= pnl;
         buys += 1;
         diffs[i] = pnl;
-      } else if (roomsData[room].playerTrades[i] == 2) { //Sells
+      } else if (roomsData[room].playerTrades[i] === 2) { //Sells
         let pnl = roomsData[room].bid - resolvePrice;
         roomsData[room].leaderboard[i].score += pnl;
         //may not need this next line
