@@ -91,15 +91,15 @@ io.on("connection", socket => {
       roomsData[room].started = true;
       roomsData[room].round = 1;
 
-      let usernames = Object.values(roomsData[room].usernames)
       //create user data
+      let usernames = Object.values(roomsData[room].usernames)
       for (let i = 0; i < usernames.length; i++) {
         roomsData[room].usernameToGameId[usernames[i]] = i;
         roomsData[room].leaderboard[i] = new Player(usernames[i], i, 0);
       }
       roomsData[room].playerTrades = new Array(usernames.length).fill(0);
       roomsData[room].playerScores = new Array(usernames.length).fill(0);
-      roomsData[room].traderCt = roomsData[room].usernames.size;
+      roomsData[room].traderCt = usernames.length-1;
     } else {
       console.log('too few players');
     }
@@ -145,7 +145,6 @@ io.on("connection", socket => {
         delete playerToRoom[socket.id]
         if (roomsData.hasOwnProperty(room) && roomsData[room]['usernames'].hasOwnProperty(socket.id)) {
           delete roomsData[room].usernames[socket.id]
-          let usernames = Object.values(roomsData[room].usernames)
           roomsData[room].traderCt = usernames.length-1;
           console.log("client disconnect: ", roomsData[room].usernames[socket.id]);
         }
