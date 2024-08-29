@@ -5,13 +5,18 @@ import React from 'react';
 import Scorebar from '../scorebar/scorebar.js';
 
 import * as io from 'socket.io-client';
+import SocketContext from "../../socket";
 const socket = io.connect(
   process.env.NODE_ENV === 'production' ? `${process.env.REACT_APP_SERVER_URL}` : 'http://localhost:4000'
 );
 
+
 //import loading circle
 
 export default function Game(props) {
+  //get socket
+  const socket = React.useContext(SocketContext);
+  
   //0: bidding down spread, 1: setting line, 2: buy/selling, 3: waiting for leaderboard to update
   //props.usn for username
   //props.room for room
@@ -29,11 +34,12 @@ export default function Game(props) {
   const [myDiff, setMyDiff] = useState(0);
 
   socket.emit("requestRoom", props.room);
+
   
   //trade parseInt for parseDouble
   const bid = () => {
     if (isNaN(parseInt(mySpread))) return; //entered not a number somehow
-    socket.emit('bid', parseInt(mySpread), props.usn, props.room);
+    socket.emit('bid', parseInt(mySpread), props.usn, props.room, props.id);
   }
 
   const updateLine = (bidPrice) => {
@@ -63,9 +69,11 @@ export default function Game(props) {
       setOfficialSpread(spread);
       setGameState(1);
     });
-    socket.on('startLineSettingPlayer', () => {
-      setWaitingFor('Market Maker');
-      setGameState(3);
+    socket.on('startLineSettingPlayer', (mmID) => {
+      if(props.id != mmID) {
+        setWaitingFor('Market Maker');
+        setGameState(3);
+      }
     });
     display =
       <p>

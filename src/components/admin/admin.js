@@ -5,15 +5,17 @@ import Button from 'react-bootstrap/Button';
 import styled from 'styled-components';
 
 import * as io from 'socket.io-client';
-const socket = io.connect(
-  process.env.NODE_ENV === 'production' ? `${process.env.REACT_APP_SERVER_URL}` : 'http://localhost:4000'
-);
+import SocketContext from "../../socket";
+import React from 'react';
 
 //import loading circle
 
 export default function Admin(props) {
+  //import socket
+  const socket = React.useContext(SocketContext);
+
   //0: setting topic/start round, 1: waiting for bidding, 2: waiting for players to setline/trade, 3: resolving price, 4: leaderboard
-  //access admin's socketid with props.id
+  //access admin's userID with props.id
   //props.room for old room
   const [adminState, setAdminState] = useState(0);
   const [bidPrice, setBidPrice] = useState(0);
@@ -29,6 +31,7 @@ export default function Admin(props) {
   const [roundStats, setRoundStats] = useState([]); //[buys, sells, mmPnL]
   
   socket.emit("requestRoom", props.room);
+
 
   const startBidding = () => {
     socket.emit('startBidding', props.id);

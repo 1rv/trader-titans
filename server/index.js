@@ -13,11 +13,34 @@ app.use(cors({
 const http = require('http');
 const server = http.createServer(app)
 
+const crypto = require("crypto");
+const randomId = () => crypto.randomBytes(16).toString('hex');
+
+const { InMemorySessionStore } = require("./sessionStore");
+const sessionStore = new InMemorySessionStore();
+
+
 const io = new Server(server, {
   cors: {
     origin: "*",
   },
   connctionStateRecovery: {}
+});
+
+// session state
+io.use((socket, next) => {
+  const sessionID = socket.handshake.auth.sessionID;
+  if (sessionID) {
+    const session = sessionStore.findSession(sessionID);
+    if (session) {
+      socket.sessionID = sessionID;
+      socket.userID = session.userID;
+      return next();
+    }
+  }
+  socket.sessionID = randomId();
+  socket.userID = randomId();
+  next();
 });
 
 // maintain a list of active rooms
@@ -35,15 +58,29 @@ function Player(username, index, score) {
 
 //want a map [room]-> [admin, users, scores]
 io.on("connection", socket => {
-  //game/admin components
+  //emit session persist
+  sessionStore.saveSession(socket.sessionID, {
+    userID: socket.userID,
+    connected: true,
+  });
+ 
+  socket.emit("session", {
+    sessionID: socket.sessionID,
+    userID: socket.userID,
+  });
+
+  socket.join(socket.userID);
+  console.log("joined", socket.userID);
+  
+  //join the room of your sessionID
   socket.on("requestRoom", (room) => {
     socket.join(room)
   });
 
   //admin
-  socket.on("room-start", (room) => {
+  socket.on("room-start", (room, userID) => {
     let roomData = {
-      admin : socket.id,
+      admin : userID,
       usernames : {}, //socket.it -> username. We don't want empty username, so ill just make it perma unavailable.
       usernameToGameId: {},
       leaderboard : [], //array of usernames
@@ -58,7 +95,7 @@ io.on("connection", socket => {
       bid : 0,
       ask : 0,
       marketMaker : '',
-      marketMakerId : socket.id,
+      marketMakerId : userID,
     }
     socket.join(room);
     console.log(room);
@@ -72,8 +109,8 @@ io.on("connection", socket => {
       rooms.add(room);
 
       //store in server
-      adminToRoom[socket.id] = room; 
-      roomToAdmin[room] = socket.id;
+      adminToRoom[userID] = room; 
+      roomToAdmin[room] = userID;
       roomsData[room] = roomData;
 
       //console checks
@@ -82,10 +119,10 @@ io.on("connection", socket => {
     }
   });
 
-  socket.on('startGame', () => {
-    let numPlayers = Object.keys(roomsData[adminToRoom[socket.id]].usernames).length;
+  socket.on('startGame', (adminUserID) => {
+    let numPlayers = Object.keys(roomsData[adminToRoom[adminUserID]].usernames).length;
     if (numPlayers > 1) {
-      room = adminToRoom[socket.id]
+      room = adminToRoom[adminUserID]
       io.to(socket.id).emit('gameStartedAdmin');
       io.to(room).emit('gameStartedPlayer');
       roomsData[room].started = true;
@@ -174,8 +211,7 @@ io.on("connection", socket => {
     }
   })
 
-  socket.on("join-room", (room, username) => {
-    console.log(roomsData);
+  socket.on("join-room", (room, username, userID) => {
     if (username === '') return;
     if (rooms.has(room)) {
       if (Object.values(roomsData[room].usernames).includes(username)) {
@@ -183,13 +219,10 @@ io.on("connection", socket => {
       } else {
         socket.join(room);
         console.log("sucessfully joined room: " + room + " with username: " + username);
-        playerToRoom[socket.id] = room;
-        roomsData[room].usernames[socket.id] = username;
-        //old implementation
-        /*
-        usernames[socket.id] = username;
-        usernameSet.add(username);
-        */ 
+
+        playerToRoom[userID] = room;
+        roomsData[room].usernames[userID] = username;
+
         io.to(room).emit("updateUserDisp", Array.from(Object.entries(roomsData[room].usernames)));
         io.to(socket.id).emit('joinApproved');
       }
@@ -201,7 +234,7 @@ io.on("connection", socket => {
   });
 
   //player game logic things 
-  socket.on('bid', (newSpread, username, room) => {
+  socket.on('bid', (newSpread, username, room, userID) => {
     if (!roomsData[room].biddingOpen || newSpread > (0.9001*roomsData[room].spread)) {
       //bidding closed or bid not small enough, throw a fit
     } else {
@@ -209,7 +242,7 @@ io.on("connection", socket => {
       console.log(username);
       roomsData[room].spread = newSpread;
       roomsData[room].marketMaker = username;
-      roomsData[room].marketMakerId = socket.id;
+      roomsData[room].marketMakerId = userID;
       io.to(room).emit('bidAccepted', newSpread, username);
     }
   }); 
@@ -219,10 +252,11 @@ io.on("connection", socket => {
     //tell admin setting has begun
     //tell other players to wait
     //close bidding
+    mmID = roomsData[room].marketMakerId;
+
     io.to(room).emit('startLineSettingAdmin');
-    console.log(roomsData[room].marketMakerId);
     io.to(roomsData[room].marketMakerId).emit('startLineSettingMarketMaker', roomsData[room].spread);
-    socket.to(room).except(roomsData[room].marketMakerId).emit('startLineSettingPlayer');
+    socket.to(room).emit('startLineSettingPlayer', mmID);
     roomsData[room].biddingOpen = false;
   });
 
@@ -253,7 +287,6 @@ io.on("connection", socket => {
     } else {
       //something really wrong has happened. Throw an error?
     }
-    console.log(type);
     //wildly inefficient to do this, both sending the number of traders out, and sending the msg to everyone instead of just admin
     roomsData[room].tradesCt += 1;
     socket.to(room).emit('tradeRecievedAdmin', roomsData[room].tradesCt, roomsData[room].traderCt);
@@ -325,10 +358,6 @@ io.on("connection", socket => {
     io.to(socket.id).emit('restartRoundAdmin');
     io.to(room).emit('restartRoundPlayer');
   });
-});
-
-io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
 });
 
 server.listen(process.env.PORT || 4000, () => {
