@@ -32,6 +32,10 @@ export default function Admin(props) {
   
   socket.emit("requestRoom", props.room);
 
+  if(props.behind) { //middle of game - may be behind!
+    
+  }
+
 
   const startBidding = () => {
     socket.emit('startBidding', props.id);

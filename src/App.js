@@ -61,14 +61,8 @@ function App() {
     console.log('kickPlayer', id);
   }
 
-  socket.on("session", ({sessionID, userID, pageState}) => {
-    socket.auth = {sessionID};
-    sessionStorage.setItem("sessionID", sessionID);
-    socket.userID = userID;
-    sessionStorage.setItem("userID", userID);
-    console.log("pageState", pageState);
-    setState(pageState);
-  });
+  let queryServer = false;
+
 
   // 0 - landing page/enter code
   // 1 - admin page before game start
@@ -80,6 +74,18 @@ function App() {
   const [username, setUsername] = useState('');
   const [code, setCode] = useState('');
   const [userDisp, setUserDisp] = useState('');
+  const [clientIsBehind, setClientIsBehind] = useState(false);
+
+  socket.on("session", ({sessionID, userID, pageState, clientBehind}) => {
+    socket.auth = {sessionID};
+    sessionStorage.setItem("sessionID", sessionID);
+    socket.userID = userID;
+    sessionStorage.setItem("userID", userID);
+    console.log("pageState", pageState);
+    setState(pageState);
+    setClientIsBehind(clientBehind);
+  });
+
 
   var inputs;
   //states
@@ -152,6 +158,7 @@ function App() {
       <Admin 
         room={code}
         id={socket.userID}
+        behind={clientIsBehind}
       />
     </Suspense>;
   }
@@ -161,6 +168,7 @@ function App() {
         usn={username}
         room={code}
         id={socket.userID}
+        behind={clientIsBehind}
       />
     </Suspense>;
   }

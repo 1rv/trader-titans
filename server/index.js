@@ -65,10 +65,12 @@ io.on("connection", socket => {
   });
 
   let inferredState = 0;
+  let possibleClientBehind = false;
   adminRoom = adminToRoom[socket.userID];
   if (adminRoom) {
     if (roomsData[adminRoom].started) {
       inferredState = 4;
+      possibleClientBehind = true;
     } else {
       inferredState = 1;
     }
@@ -77,6 +79,7 @@ io.on("connection", socket => {
     if (playerRoom) {
       if (roomsData[playerRoom].started) {
         inferredState = 5;
+        possibleClientBehind = true;
       } else {
         inferredState = 3;
       }
@@ -88,6 +91,7 @@ io.on("connection", socket => {
     sessionID: socket.sessionID,
     userID: socket.userID,
     pageState: inferredState,
+    clientBehind: possibleClientBehind,
   });
 
   socket.join(socket.userID);
