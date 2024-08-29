@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState , useEffect} from 'react';
 import Button from 'react-bootstrap/Button';
 import React from 'react';
 
@@ -22,7 +22,7 @@ export default function Game(props) {
   //props.room for room
   //props.id for old socketid
   //this actually sucks and I should figure out a better way to do this
-  const [gameState, setGameState] = useState(3);
+  const [state, setState] = useState(3);
   const [bidPrice, setBidPrice] = useState(0);
   const [askPrice, setAskPrice] = useState(0);
   const [myBidPrice, setMyBidPrice] = useState(NaN);
@@ -62,17 +62,80 @@ export default function Game(props) {
   }
 
   var display;
+  
+  //if behind, update state!
+  useEffect(() => {
+    if(props.behind) {
+      socket.emit('getScoreBoardData', props.id);
+
+      socket.emit('getGameData', props.id);
+      props.setBehind(false);
+    }
+  });
+
+  socket.on('scoreBoardData', ({username, score}) => {
+    console.log('got scoreboardData');
+    setScore(score);
+    props.setUsn(username);
+
+  });
+
+  socket.on('giveGameData', (gameData) => {
+    console.log('got gameData', gameData);
+    const gameState = gameData.state;
+    props.setRoom(gameData.room);
+    //'setting-topic', 'bidding-down-spread', 
+    //'market-maker-setting-line', 'trading', 'round-stats'
+    switch(gameState) {
+      case 'setting-topic':
+        setWaitingFor('round');
+        setState(3);
+        break;
+      case 'bidding-down-spread':
+        setState(0);
+        console.log(state);
+        break;
+      case 'market-maker-setting-line':
+        if(gameData.isMarketMaker) {
+          setOfficialSpread(gameData.spreadWidth);
+          setState(1);
+        } else {
+          setWaitingFor('Market Maker');
+          setState(3);
+        }
+        break;
+      case 'trading':
+        if(gameData.isMarketMaker) {
+          setWaitingFor('traders on your market');
+          setState(3);
+        } else {
+          if(gameData.alreadyTraded) {
+            setWaitingFor('other traders');
+            setState(3);
+          } else {
+            setBidPrice(gameData.bidPrice);
+            setAskPrice(gameData.askPrice);
+            setState(2);
+          }
+        }
+        break;
+      case 'round-stats':
+        setMyDiff(gameData.scoreChange);
+        setState(4);
+        break;
+    }
+  });
 
   //0: bidding down spread, 1: setting line, 2: buy/selling, 3: waiting for various things, 4: leaderboard
-  if (gameState === 0) {
+  if (state === 0) {
     socket.on('startLineSettingMarketMaker', (spread) => {
       setOfficialSpread(spread);
-      setGameState(1);
+      setState(1);
     });
     socket.on('startLineSettingPlayer', (mmID) => {
       if(props.id != mmID) {
         setWaitingFor('Market Maker');
-        setGameState(3);
+        setState(3);
       }
     });
     display =
@@ -81,14 +144,14 @@ export default function Game(props) {
         <input id="newSpread" type="text" placeholder="your bid" autoFocus='true' value={mySpread} onChange={e=> setMySpread(e.target.value)}/>
         <Button variant="primary" onClick = {bid}>Bid</Button>
       </p>
-  } else if (gameState === 1) {
+  } else if (state === 1) {
     //officially the market maker
     //fix this with parseint.
     socket.on('marketMakerLineConfirmed', () => {
       setMyBidPrice(NaN);
       setMyAskPrice(NaN);
       setWaitingFor('traders on your market');
-      setGameState(3);
+      setState(3);
     });
     display = 
       <p>
@@ -96,11 +159,11 @@ export default function Game(props) {
         <input id="Bid Price" type="text" placeholder="Bid Price" autoFocus='true' onChange={e=> updateLine(e.target.value)}/> 
         <Button variant="primary" onClick = {setLine}>Confirm</Button>
       </p>
-  } else if (gameState === 2) {
+  } else if (state === 2) {
     //buying and selling
     socket.on('tradeRecievedPlayer', () => {
       setWaitingFor('other traders');
-      setGameState(3);
+      setState(3);
     });
     display = 
       <p>
@@ -110,36 +173,36 @@ export default function Game(props) {
         <Button variant="primary" onClick = {playerSell}>Sell</Button>
         <Button variant="primary" onClick = {playerBuy}>Buy</Button>
       </p>
-  } else if (gameState === 3) {
+  } else if (state === 3) {
     //waiting room
     socket.on('startBuySellPlayer', (mm, bid, ask) => {
       if(mm !== props.usn) {
-        setGameState(2);
+        setState(2);
         setBidPrice(bid)
         setAskPrice(ask)
       }
     });
     socket.on('startBiddingPlayer', () => {
-      setGameState(0);
+      setState(0);
     });
     socket.on('roundResultsPlayer', (usnDiff) => {
       setMyDiff(usnDiff[props.usn]);
       //setScore(score+usnDiff[props.usn]); no idea why but this doens't work
       let t = score+usnDiff[props.usn];
       setScore(t);
-      setGameState(4);
+      setState(4);
     });
     display = 
       <p>
         Waiting for {waitingFor}...
       </p>;
-  } else if (gameState === 4) {
+  } else if (state === 4) {
     socket.on('restartRoundPlayer', () => {
       setWaitingFor('round');
       setMyBidPrice(NaN);
       setMyAskPrice(NaN);
       setMySpread('');
-      setGameState(3);
+      setState(3);
     });
     display = 
       <p>

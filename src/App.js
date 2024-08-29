@@ -159,6 +159,7 @@ function App() {
         room={code}
         id={socket.userID}
         behind={clientIsBehind}
+        setBehind={setClientIsBehind}
       />
     </Suspense>;
   }
@@ -166,9 +167,12 @@ function App() {
     inputs = <Suspense fallback = {<p>Loading...</p>}>
       <Game 
         usn={username}
+        setUsn={setUsername}
         room={code}
+        setRoom={setCode}
         id={socket.userID}
         behind={clientIsBehind}
+        setBehind={setClientIsBehind}
       />
     </Suspense>;
   }

@@ -22,11 +22,9 @@ socket.connect();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <SocketContext.Provider value={socket}>
-      <App />
-    </SocketContext.Provider>
-  </React.StrictMode>
+  <SocketContext.Provider value={socket}>
+    <App />
+  </SocketContext.Provider>
 );
 
 // If you want to start measuring performance in your app, pass a function
