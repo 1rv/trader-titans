@@ -59,14 +59,35 @@ function Player(username, index, score) {
 //want a map [room]-> [admin, users, scores]
 io.on("connection", socket => {
   //emit session persist
+  console.log("woah! a connection", socket.userID)
   sessionStore.saveSession(socket.sessionID, {
     userID: socket.userID,
-    connected: true,
   });
- 
+
+  let inferredState = 0;
+  adminRoom = adminToRoom[socket.userID];
+  if (adminRoom) {
+    if (roomsData[adminRoom].started) {
+      inferredState = 4;
+    } else {
+      inferredState = 1;
+    }
+  } else {
+    playerRoom = playerToRoom[socket.userID];
+    if (playerRoom) {
+      if (roomsData[playerRoom].started) {
+        inferredState = 5;
+      } else {
+        inferredState = 3;
+      }
+    }
+  }
+
+  console.log("inferredState after calculation", inferredState);
   socket.emit("session", {
     sessionID: socket.sessionID,
     userID: socket.userID,
+    pageState: inferredState,
   });
 
   socket.join(socket.userID);
@@ -98,7 +119,6 @@ io.on("connection", socket => {
       marketMakerId : userID,
     }
     socket.join(room);
-    console.log(room);
 
     io.to(room).emit('Admin connected');
     if (rooms.has(room)) {
@@ -113,9 +133,6 @@ io.on("connection", socket => {
       roomToAdmin[room] = userID;
       roomsData[room] = roomData;
 
-      //console checks
-      console.log(roomsData);
-      console.log(adminToRoom);
     }
   });
 
