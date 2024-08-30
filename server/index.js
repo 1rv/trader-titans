@@ -114,6 +114,9 @@ io.on("connection", socket => {
       playerScores : [], // userID -> score
       tradesCt : 0,
       traderCt : 0,
+      buys : 0,
+      sells : 0,
+      mmdiff : 0,
       started : false,
       biddingOpen : false,
       round : 0,
@@ -122,6 +125,7 @@ io.on("connection", socket => {
       ask : 0,
       marketMaker : '',
       marketMakerId : userID,
+      topic : '',
       gameState : 'setting-topic', //'setting-topic', 'bidding-down-spread', 
                                   //'market-maker-setting-line', 'trading', 'round-stats'
     }
@@ -171,13 +175,14 @@ io.on("connection", socket => {
     socket.of(playerNamespace).to(room).emit("choiceUpdate", ++choiceCount);
   });
 
-  socket.on('startBidding', (adminId) => {
+  socket.on('startBidding', (adminId, topic) => {
     io.to(socket.id).emit('startBiddingAdmin');
     room = adminToRoom[adminId];
     io.to(room).emit('startBiddingPlayer');
     roomsData[room].gameState = 'bidding-down-spread';
     roomsData[room].biddingOpen = true;
     roomsData[room].spread = Number.MAX_SAFE_INTEGER;
+    roomsData[room].topic = topic;
   });
 
   //disconnection logic - both 
@@ -203,7 +208,7 @@ io.on("connection", socket => {
         delete playerToRoom[socket.id]
         if (roomsData.hasOwnProperty(room) && roomsData[room]['usernames'].hasOwnProperty(socket.id)) {
           delete roomsData[room].usernames[socket.id]
-          roomsData[room].traderCt = usernames.length-1;
+          //roomsData[room].traderCt = usernames.length-1;
           console.log("client disconnect: ", roomsData[room].usernames[socket.id]);
         }
       }
@@ -353,6 +358,10 @@ io.on("connection", socket => {
 
     roomsData[room].gameState = 'round-stats';
 
+    roomsData[room].buys = buys;
+    roomsData[room].sells = sells;
+    roomsData[room].mmdiff = mmdiff;
+
     //change these to be to the room
     io.to(room).emit('roundResultsPlayer', usnDiff);
     socket.emit('roundResultsAdmin', topFive.slice(0, Math.min(topFive.length, 5)), [buys, sells, mmdiff]);
@@ -367,6 +376,12 @@ io.on("connection", socket => {
     roomsData[room].round += 1;
     roomsData[room].marketMaker = '';
     roomsData[room].tradesCt = 0;
+    roomsData[room].buys = 0;
+    roomsData[room].sells = 0;
+    roomsData[room].mmdiff = mmdiff;
+    roomsData[room].gameState = 'setting-topic';
+
+    roomsData[room].
 
     //emit to users
     io.to(socket.id).emit('restartRoundAdmin');
@@ -400,8 +415,9 @@ io.on("connection", socket => {
 
   socket.on('getGameData', (userID) => {
     room = playerToRoom[userID];
-    usn = roomsData[room].usernames[userID];
-    index = roomsData[room].usernameToGameId[usn];
+    if(!room) {
+      room = adminToRoom[userID];
+    }
     state = roomsData[room].gameState;
 
     const gameData = {};
@@ -411,8 +427,36 @@ io.on("connection", socket => {
     gameData.room = room;
     //'setting-topic', 'bidding-down-spread', 
     //'market-maker-setting-line', 'trading', 'round-stats'
-    if(!gameData.isAdmin) {
+    if(gameData.isAdmin) {
+      switch(state) {
+        case 'setting-topic':
+          break;
+        case 'bidding-down-spread':
+          gameData.topic = roomsData[room].topic;
+          gameData.spread = roomsData[room].spread;
+          gameData.marketMakerUsername = roomsData[room].marketMaker;
+          break;
+        case 'market-maker-setting-line':
+          gameData.topic = roomsData[room].topic;
+          break;
+        case 'trading':
+          gameData.topic = roomsData[room].topic;
+          gameData.bidPrice = roomsData[room].bid;
+          gameData.askPrice = roomsData[room].ask;
+          gameData.tradesCt = roomsData[room].tradesCt;
+          gameData.traderCt = roomsData[room].traderCt;
+          break;
+        case 'round-stats':
+          gameData.topFive = [...roomsData[room].leaderboard];
+          gameData.buys = roomsData[room].buys;
+          gameData.sells = roomsData[room].sells;
+          gameData.mmdiff = roomsData[room].mmdiff;
+          break;
+      }
+    } else {
       //player
+      usn = roomsData[room].usernames[userID];
+      index = roomsData[room].usernameToGameId[usn];
       switch (state) {
         case 'setting-topic':
           break;

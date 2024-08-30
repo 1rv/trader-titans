@@ -1,5 +1,5 @@
 import { MouseEventHandler } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 
 import styled from 'styled-components';
@@ -32,13 +32,52 @@ export default function Admin(props) {
   
   socket.emit("requestRoom", props.room);
 
-  if(props.behind) { //middle of game - may be behind!
-    
-  }
+  useEffect(() => {
+    if(props.behind) {
+      socket.emit('getGameData', props.id);
+      props.setBehind(false);
+    }
+  });
+
+  socket.on('giveGameData', (gameData) => {
+    const gameState = gameData.state;
+    props.setRoom(gameData.room);
+    //'setting-topic', 'bidding-down-spread', 
+    //'market-maker-setting-line', 'trading', 'round-stats'
+    switch(gameState) {
+      case 'setting-topic':
+        setAdminState(0)
+        break;
+      case 'bidding-down-spread':
+        setTopic(gameData.topic);
+        setSpread(gameData.spread);
+        setMarketMaker(gameData.marketMakerUsername);
+        setAdminState(1);
+        break;
+      case 'market-maker-setting-line':
+        setWaitingFor('Waiting for Market Maker...');
+        setAdminState(2);
+        break;
+      case 'trading':
+        setBidPrice(gameData.bidPrice);
+        setAskPrice(gameData.askPrice);
+        setWaitingFor('Waiting for Traders...');
+        setMarketString("Market: "+ gameData.bidPrice + "@" + gameData.askPrice);
+        //TODO: figure out why setBidPrice not working
+        setTraderString(gameData.tradesCt + " out of " + gameData.traderCt + " trades processed");
+        setAdminState(2);
+        break;
+      case 'round-stats':
+        setTopFive(gameData.topFive);
+        setRoundStats([gameData.buys, gameData.sells, gameData.mmdiff]);
+        setAdminState(3);
+        break;
+    }
+  });
 
 
   const startBidding = () => {
-    socket.emit('startBidding', props.id);
+    socket.emit('startBidding', props.id, topic);
     socket.on('startBiddingAdmin', () => {
       setAdminState(1);
     });
@@ -67,7 +106,7 @@ export default function Admin(props) {
 
   var display;
 
-  //0: setting topic/start round, 1: waiting for bidding, 2: waiting for players to setline/trade, 3: resolving price, 4: leaderboard
+  //0: setting topic/start round, 1: waiting for bidding, 2: waiting for players to setline/trade, 3: leaderboard
   if (adminState == 0) {
     display = 
       <>
@@ -101,7 +140,7 @@ export default function Admin(props) {
     socket.on('roundResultsAdmin', (topFive, roundStats) => {
       setTopFive(topFive);
       setRoundStats(roundStats);
-      setAdminState(4);
+      setAdminState(3);
     });
     display = 
       <>
@@ -113,11 +152,6 @@ export default function Admin(props) {
         <Button variant="primary" onClick = {tradingDone}>Resolve</Button>
       </>
   } else if (adminState == 3) {
-    display = 
-      <>
-        Waiting for trades to resolve... this shouldnt happen
-      </>
-  } else if (adminState == 4) {
     socket.on('restartRoundAdmin', () => {
       setTopic('');
       setMarketMaker('');
@@ -128,6 +162,16 @@ export default function Admin(props) {
     });
     //there must be a better way of doing this
     let n = topFive.length;
+
+    let common = <>
+      buys: {roundStats[0]}
+      <br></br>
+      sells: {roundStats[1]}
+      <br></br>
+      Market Maker ({marketMaker}) PnL: {roundStats[2]}
+      <br></br>
+      <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+    </>
     if (n == 2) {
       display =
         <>
@@ -138,13 +182,7 @@ export default function Admin(props) {
           <br></br>
           <br></br>
           <h2>Round Stats:</h2>
-          buys: {roundStats[0]}
-          <br></br>
-          sells: {roundStats[1]}
-          <br></br>
-          Market Maker ({marketMaker}) PnL: {roundStats[2]}
-          <br></br>
-          <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+          {common}
         </>
     } else if (n == 3) {
       display =
@@ -158,13 +196,7 @@ export default function Admin(props) {
           <br></br>
           <br></br>
           <h2>Round Stats:</h2>
-          buys: {roundStats[0]}
-          <br></br>
-          sells: {roundStats[1]}
-          <br></br>
-          Market Maker ({marketMaker}) PnL: {roundStats[2]}
-          <br></br>
-          <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+          {common}
         </>
     } else if (n == 4) {
       display =
@@ -180,13 +212,7 @@ export default function Admin(props) {
           <br></br>
           <br></br>
           <h2>Round Stats:</h2>
-          buys: {roundStats[0]}
-          <br></br>
-          sells: {roundStats[1]}
-          <br></br>
-          Market Maker ({marketMaker}) PnL: {roundStats[2]}
-          <br></br>
-          <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+          {common}
         </>
     } else {
       display =
@@ -204,13 +230,7 @@ export default function Admin(props) {
           <br></br>
           <br></br>
           <h2>Round Stats:</h2>
-          buys: {roundStats[0]}
-          <br></br>
-          sells: {roundStats[1]}
-          <br></br>
-          Market Maker ({marketMaker}) PnL: {roundStats[2]}
-          <br></br>
-          <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+          {common}
         </>
     }
   }

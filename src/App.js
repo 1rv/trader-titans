@@ -101,7 +101,6 @@ function App() {
         </span>
         <br></br>
         <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
-        <p>{socket.userID}</p>
       </>
   } else if (state == 1) {
     //admin
@@ -157,6 +156,7 @@ function App() {
     inputs = <Suspense fallback = {<p>Loading...</p>}>
       <Admin 
         room={code}
+        setRoom={setCode}
         id={socket.userID}
         behind={clientIsBehind}
         setBehind={setClientIsBehind}

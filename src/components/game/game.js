@@ -81,7 +81,6 @@ export default function Game(props) {
   });
 
   socket.on('giveGameData', (gameData) => {
-    console.log('got gameData', gameData);
     const gameState = gameData.state;
     props.setRoom(gameData.room);
     //'setting-topic', 'bidding-down-spread', 
