@@ -1,6 +1,6 @@
 import React from 'react';
 import { lazy, Suspense } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 
 import logo from './logo.svg';
@@ -25,6 +25,11 @@ function App() {
   //socket from context
   const socket = React.useContext(SocketContext);
 
+  const [state, setState] = useState(0);
+  const [username, setUsername] = useState('');
+  const [code, setCode] = useState('');
+  const [userDisp, setUserDisp] = useState('');
+  const [clientIsBehind, setClientIsBehind] = useState(false);
   //admin
   const createRoom = () => {
     socket.emit("room-start", code, socket.userID)
@@ -70,29 +75,61 @@ function App() {
   // 3 - trader page before game start
   // 4 - admin component
   // 5 - trader component
-  const [state, setState] = useState(0);
-  const [username, setUsername] = useState('');
-  const [code, setCode] = useState('');
-  const [userDisp, setUserDisp] = useState('');
-  const [clientIsBehind, setClientIsBehind] = useState(false);
+  useEffect(() => {
+  socket.on('heartbeat', () => {
+    socket.emit('heartbeatResponse', socket.userID);
+  });
 
   socket.on("session", ({sessionID, userID, pageState, clientBehind}) => {
     socket.auth = {sessionID};
     sessionStorage.setItem("sessionID", sessionID);
     socket.userID = userID;
     sessionStorage.setItem("userID", userID);
-    console.log("pageState", pageState);
     setState(pageState);
     setClientIsBehind(clientBehind);
+
+    if(pageState === 1) {
+      socket.emit('getAdminData', userID);
+    }
   });
 
+  socket.on('giveAdminData', ({code, users}) => {
+    setCode(code);
+    setUserDisp(constructUserList(users));
+  });
+
+  socket.on('kickPlayer', (id) => {
+    if (id == socket.userID) {
+      setState(0);
+    }
+  });
+  }, [socket]);
+
+
+  function constructUserList(users) {
+    if(users.length === 0) {
+      return;
+    }
+    const userElements = users.map((userData, index) => (
+      <span 
+        key={index} 
+        className="underline-on-hover" 
+        onClick = {() => kickPlayer(userData[0])}
+      > 
+        {userData[1]} 
+      </span>
+    ));
+    return userElements
+  }
 
   var inputs;
   //states
   if (state === 0) {
     inputs = 
       <>
-        <input id="code" type="text" placeholder="type room code" autoFocus='true' value={code} onChange={e=> setCode(e.target.value)}
+        <input id="code" type="text" placeholder="type room code" autoFocus='true' 
+          value={code} onChange={e=>setCode(e.target.value)}
+          maxlength="10"
         />
         <br></br>
         <span class='nowrap'>
@@ -105,26 +142,9 @@ function App() {
   } else if (state == 1) {
     //admin
     socket.on('updateUserDisp', users => {
-      //not a good solution
-      //if nothing, do nothing
-      if (users.length == 0) {
-        setUserDisp();
-      }
-      //otherwise display all names
-      // Create an array of JSX elements for each username
-      const userElements = users.map((userData, index) => (
-        
-        <span 
-          key={index} 
-          className="underline-on-hover" 
-          onClick = {() => kickPlayer(userData[0])}
-        > 
-          {userData[1]} 
-        </span>
-      ));
-    
-      setUserDisp(userElements);
+      setUserDisp(constructUserList(users));
     });
+
     inputs = 
       <>
         <h1>Game Code: {code}</h1><br></br>
@@ -138,7 +158,8 @@ function App() {
     inputs = 
       <>
         <input id="name" type="text" placeholder="type username" autoFocus='true' value={username}
-        onChange={e=> setUsername(e.target.value)}
+          onChange={e=> setUsername(e.target.value)}
+          maxlength="15"
         />
         <Button variant="primary" onClick = {joinRoomFinal}>Join Room</Button>
         <br></br>
@@ -177,12 +198,6 @@ function App() {
     </Suspense>;
   }
 
-  socket.on('kickPlayer', (id) => {
-    console.log('kick?', id)
-    if (id == socket.userID) {
-      setState(0);
-    }
-  });
 
   // admin left? return to main menu
   if (state === 2 || state === 6  || state === 3) {

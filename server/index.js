@@ -27,6 +27,8 @@ const io = new Server(server, {
   connctionStateRecovery: {}
 });
 
+
+
 // session state
 io.use((socket, next) => {
   const sessionID = socket.handshake.auth.sessionID;
@@ -50,13 +52,22 @@ const playerToRoom = {};
 const roomToAdmin = {};
 const roomsData = {};
 
+//heartbeats
+const adminHeartbeats = {};
+
 function Player(username, index, score) {
   this.username = username;
   this.index = index;
   this.score = score;
 }
 
-//want a map [room]-> [admin, users, scores]
+//emit a heartbeat every 5s
+setInterval(() => {
+  io.to('adminRoom').emit('heartbeat');
+}, 5000);
+
+
+
 io.on("connection", socket => {
   socket.join(socket.userID);
   //emit session persist
@@ -69,6 +80,7 @@ io.on("connection", socket => {
   adminRoom = adminToRoom[socket.userID];
   if (adminRoom) {
     socket.join(adminRoom);
+    socket.join('adminRoom');
     if (roomsData[adminRoom].started) {
       inferredState = 4;
       possibleClientBehind = true;
@@ -102,8 +114,44 @@ io.on("connection", socket => {
     socket.join(room)
   });
 
+  //heartbeat functions
+  const setHeartbeatTimeout = (ID) => {
+    adminHeartbeats[ID] = setTimeout(() => {
+      console.log('no response from admin ' + ID + ' for room ' + adminToRoom[ID] + ' , deleting...');
+      destroyRoom(adminToRoom[ID], ID);
+    }, 30000);
+  };
+
+
+
+  socket.on('heartbeatResponse', (userID) => {
+    // why is this happening 4 times?
+    clearTimeout(adminHeartbeats[userID]);
+    setHeartbeatTimeout(userID);
+  });
+
+  function destroyRoom(room, adminID) {
+    console.log('destroying room ', room);
+    rooms.delete(room);
+
+    //kick all players. 1: tell all to go to main screen 2: disconnect all from room 3: delete room data
+    io.to(room).emit('roomClosed', room);
+    io.socketsLeave(room);
+    delete roomsData[room];
+
+    //delete server data
+    delete roomToAdmin[room];
+    delete adminToRoom[adminID];
+
+    clearTimeout(adminHeartbeats[adminID]);
+  }
+
+
   //admin
   socket.on("room-start", (room, userID) => {
+    console.log('room started?');
+    setHeartbeatTimeout(userID);
+
     let roomData = {
       admin : userID,
       usernames : {}, //userID -> username. We don't want empty username, so ill just make it perma unavailable.
@@ -130,6 +178,7 @@ io.on("connection", socket => {
                                   //'market-maker-setting-line', 'trading', 'round-stats'
     }
     socket.join(room);
+    socket.join('adminRoom');
 
     io.to(room).emit('Admin connected');
     if (rooms.has(room)) {
@@ -239,7 +288,7 @@ io.on("connection", socket => {
         io.to(socket.id).emit('joinApproved');
       }
     } else {
-      console.log("tried to join an unitiated room, username: " + username); 
+      console.log("tried to join an unitiated room, username: ", username); 
       console.log(rooms);
       console.log(room);
     }
@@ -481,6 +530,14 @@ io.on("connection", socket => {
     }
     console.log('giveGameData', gameData, userID);
     io.to(socket.id).emit('giveGameData', gameData);
+  });
+
+  socket.on('getAdminData', (userID) => {
+    console.log('requested admin data', userID);
+    socket.emit('giveAdminData', {
+      code: adminToRoom[userID],
+      users: Array.from(Object.entries(roomsData[adminToRoom[userID]].usernames)),
+    });
   });
 });
 

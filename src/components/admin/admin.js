@@ -32,6 +32,7 @@ export default function Admin(props) {
   
   socket.emit("requestRoom", props.room);
 
+
   useEffect(() => {
     if(props.behind) {
       socket.emit('getGameData', props.id);
