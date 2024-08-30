@@ -391,7 +391,6 @@ io.on("connection", socket => {
     }
     roomsData[room].leaderboard[mmIndex].score += mmdiff;
     roomsData[room].playerRoundScores[mmIndex] += mmdiff;
-    roomsData[room].playerRoundScores[mmIndex] += mmdiff;
     roomsData[room].playerScores[mmIndex] += mmdiff;
     diffs[mmIndex] = mmdiff;
 
