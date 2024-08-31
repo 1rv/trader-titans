@@ -87,7 +87,6 @@ export default function Game(props) {
       setScore(score);
       props.setUsn(username);
       setMyUsername(username);
-      console.log(username, myUsername, props.usn);
     });
 
     socket.on('giveGameData', (gameData) => {
@@ -129,7 +128,7 @@ export default function Game(props) {
           }
           break;
         case 'round-stats':
-          setMyDiff(gameData.scoreChange);
+          setMyDiff(gameData.scoreChange); //I suspect this function is fishy.
           setState(4);
           break;
       }
@@ -165,11 +164,11 @@ export default function Game(props) {
     socket.on('startBiddingPlayer', () => {
       setState(0);
     });
-    socket.on('roundResultsPlayer', (usnDiff) => {
-      console.log(myUsername, usnDiff, usnDiff[myUsername]);
-      setMyDiff(usnDiff[myUsername]);
+    socket.on('roundResultsPlayer', (idDiff) => {
+      console.log(props.id, idDiff, idDiff[props.id]);
+      setMyDiff(idDiff[props.id]);
       //setScore(score+usnDiff[props.usn]); no idea why but this doens't work
-      let t = score+usnDiff[myUsername];
+      let t = score+idDiff[props.id];
       setScore(t);
       setState(4);
     });
@@ -192,7 +191,7 @@ export default function Game(props) {
         toast.success('bid successful at ' + newSpread);
       }
     });
-  }, [socket, myUsername]);
+  }, [socket]);
   //0: bidding down spread, 1: setting line, 2: buy/selling, 3: waiting for various things, 4: leaderboard
   
   if (state === 0) {

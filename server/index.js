@@ -380,11 +380,9 @@ io.on("connection", socket => {
     diffs[mmIndex] = mmdiff;
 
     //create stuff for admin/players
-    let usnDiff = {}
-    let usnScores = {}
-    for (const usn of Object.values(roomsData[room].usernames)) {
-      usnDiff[usn] = diffs[roomsData[room].usernameToGameId[usn]];
-      console.log(usnDiff);
+    let idDiff = {}
+    for (const id of Object.keys(roomsData[room].usernames)) {
+      idDiff[id] = diffs[roomsData[room].usernameToGameId[roomsData[room].usernames[id]]];
     }
 
     let topFive = [...roomsData[room].leaderboard];
@@ -397,7 +395,7 @@ io.on("connection", socket => {
     roomsData[room].mmdiff = mmdiff;
 
     //change these to be to the room
-    io.to(room).emit('roundResultsPlayer', usnDiff);
+    io.to(room).emit('roundResultsPlayer', idDiff);
     socket.emit('roundResultsAdmin', topFive.slice(0, Math.min(topFive.length, 5)), [buys, sells, mmdiff]);
     console.log(topFive.slice(0, Math.min(topFive.length, 5)));
   });
@@ -483,6 +481,7 @@ io.on("connection", socket => {
           gameData.buys = roomsData[room].buys;
           gameData.sells = roomsData[room].sells;
           gameData.mmdiff = roomsData[room].mmdiff;
+          gameData.marketMaker = roomsData[room].marketMaker;
           break;
       }
     } else {

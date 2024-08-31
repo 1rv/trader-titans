@@ -74,6 +74,7 @@ export default function Admin(props) {
         case 'round-stats':
           setTopFive(gameData.topFive);
           setRoundStats([gameData.buys, gameData.sells, gameData.mmdiff]);
+          setMarketMaker(gameData.marketMaker);
           setAdminState(3);
           break;
       }

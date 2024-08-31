@@ -62,3 +62,11 @@ npm start
 - picture on loading screen
 - dynamically scale question screen
 - if market maker disppears before they set bid/ask, what do you do? You can resolve early, but that penalizes every player that doesn't get to trade, while nothing happens to market maker? Resolving before market maker sets line also results in market maker's scoreboard being NaN, until they refresh and grab serverdata
+- server screen, showing rooms and statuses
+- refactor some stuff
+    - variables need renaming
+    - a few legacy variables might be floating around
+- winner screen, not just the leaderboard, but show all scores after game ends
+- mobile support, larger buttons and input screens
+- don't just put everything in the center of the screen
+- custom toasts(?) for aesthetics
