@@ -132,14 +132,15 @@ function App() {
 
     //errors
     socket.on('roomNameTaken', () => {
-      console.log('-');
       toast.error('room name taken!');
     });
 
-    socket.on('noSuchRoom', () => {
-      let s = 'no room found with code: ' + code
+    socket.on('usernameTaken', () => {
+      toast.error('username taken!');
+    });
 
-      toast.error(s);
+    socket.on('noSuchRoom', () => {
+      toast.error('room does not exist');
     });
 
     // admin left? return to main menu
@@ -148,6 +149,10 @@ function App() {
       console.log(state);
       setState(0);
       toast.error('admin left, room closed');
+    });
+
+    socket.on('tooFewPlayersToStart', () => {
+      toast.error('need at least 2 players to start');
     });
     
   }, [socket]);
@@ -257,6 +262,13 @@ function App() {
                 background: '#bf616a',
                 color: '#eceff4',
               },
+            },
+            success: {
+              duration: 1500,
+              style: {
+                background: '#a3be8c',
+                color: '#eceff4',
+              }
             }
           }}
         />

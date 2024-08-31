@@ -28,7 +28,13 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## client setup
 
-After installs, in the project directory, you can run:
+Navigate to the folder where the project is downloaded and install packages with
+
+```
+npm install
+```
+
+Then, in the project directory, you can run:
 
 ```
 npm start
@@ -40,9 +46,19 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 ## admin setup
 
-After installs, navigate to the server directory. By default, nodemon is used, and runs on port 4000.
+Navigate to the server directory. By default, nodemon is used, and runs on port 4000. Then run the following to install and start the server.
 
 ```
 cd server
+npm install
 npm start
 ```
+
+## things still left to implement
+
+- change logic for when players do not trade - reduce their score by min(-0.5*spread, playerScoreDifference)
+- write further error messages for within the admin/game components
+- better graphics
+- picture on loading screen
+- dynamically scale question screen
+- if market maker disppears before they set bid/ask, what do you do? You can resolve early, but that penalizes every player that doesn't get to trade, while nothing happens to market maker? Resolving before market maker sets line also results in market maker's scoreboard being NaN, until they refresh and grab serverdata
