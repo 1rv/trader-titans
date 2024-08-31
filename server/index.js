@@ -134,6 +134,11 @@ io.on("connection", socket => {
     console.log('destroying room ', room);
     rooms.delete(room);
 
+    idList = Object.keys(roomsData[room].usernames)
+    for(let id of idList) {
+      delete playerToRoom[id];
+    }
+
     //kick all players. 1: tell all to go to main screen 2: disconnect all from room 3: delete room data
     io.to(room).emit('roomClosed', room);
     io.socketsLeave(room);
@@ -149,42 +154,46 @@ io.on("connection", socket => {
 
   //admin
   socket.on("room-start", (room, userID) => {
-    console.log('room started?');
-    setHeartbeatTimeout(userID);
+    if(room.length === 0) return;
 
-    let roomData = {
-      admin : userID,
-      usernames : {}, //userID -> username. We don't want empty username, so ill just make it perma unavailable.
-      usernameToGameId: {},
-      leaderboard : [], //array of usernames
-      playerTrades : [],
-      playerRoundScores : [],
-      playerScores : [], // userID -> score
-      tradesCt : 0,
-      traderCt : 0,
-      buys : 0,
-      sells : 0,
-      mmdiff : 0,
-      started : false,
-      biddingOpen : false,
-      round : 0,
-      spread : 0,
-      bid : 0,
-      ask : 0,
-      marketMaker : '',
-      marketMakerId : userID,
-      topic : '',
-      gameState : 'setting-topic', //'setting-topic', 'bidding-down-spread', 
-                                  //'market-maker-setting-line', 'trading', 'round-stats'
-    }
-    socket.join(room);
-    socket.join('adminRoom');
 
     io.to(room).emit('Admin connected');
     if (rooms.has(room)) {
       socket.leave(room);
       console.log('room name taken');
+      io.to(socket.id).emit('roomNameTaken');
     } else {
+      setHeartbeatTimeout(userID);
+      console.log('start heartbeat for', room);
+
+      let roomData = {
+        admin : userID,
+        usernames : {}, //userID -> username. We don't want empty username, so ill just make it perma unavailable.
+        usernameToGameId: {},
+        leaderboard : [], //array of usernames
+        playerTrades : [],
+        playerRoundScores : [],
+        playerScores : [], // userID -> score
+        tradesCt : 0,
+        traderCt : 0,
+        buys : 0,
+        sells : 0,
+        mmdiff : 0,
+        started : false,
+        biddingOpen : false,
+        round : 0,
+        spread : 0,
+        bid : 0,
+        ask : 0,
+        marketMaker : '',
+        marketMakerId : userID,
+        topic : '',
+        gameState : 'setting-topic', //'setting-topic', 'bidding-down-spread', 
+                                    //'market-maker-setting-line', 'trading', 'round-stats'
+      }
+      socket.join(room);
+      socket.join('adminRoom');
+
       io.to(socket.id).emit('roomStartSuccess');
       rooms.add(room);
 
@@ -234,41 +243,14 @@ io.on("connection", socket => {
     roomsData[room].topic = topic;
   });
 
-  //disconnection logic - both 
-  socket.on('disconnect', (reason) => {
-    if (adminToRoom.hasOwnProperty(socket.id)) {
-      //admin - delete room
-      console.log('room deleted');
-      rooms.delete(adminToRoom[socket.id]);
-
-      //kick all players. 1: tell all to go to main screen 2: disconnect all from room 3: delete room data
-      io.to(adminToRoom[socket.id]).emit('roomClosed', adminToRoom[socket.id]);
-      io.socketsLeave(adminToRoom[socket.id]);
-      delete roomsData[adminToRoom[socket.id]];
-
-      //delete server data
-      delete roomToAdmin[adminToRoom[socket.id]];
-      delete adminToRoom[socket.id];
-    } else {
-      //player - remove username, delete username from room if needed
-      //I suspect mobile clients are disconnecting due to transport problems - in this case do not remove
-      if(reason !== "transport close" || reason !== "transport error") {
-        room = playerToRoom[socket.id]
-        delete playerToRoom[socket.id]
-        if (roomsData.hasOwnProperty(room) && roomsData[room]['usernames'].hasOwnProperty(socket.id)) {
-          delete roomsData[room].usernames[socket.id]
-          //roomsData[room].traderCt = usernames.length-1;
-          console.log("client disconnect: ", roomsData[room].usernames[socket.id]);
-        }
-      }
-    }
-  });
-
 
   //player
   socket.on('tryRoom', (room) => {
     if (rooms.has(room)) {
       io.to(socket.id).emit('roomExists');
+    } else {
+      io.to(socket.id).emit('noSuchRoom');
+      console.log('nosuchroom');
     }
   })
 

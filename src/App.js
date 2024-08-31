@@ -16,6 +16,9 @@ import * as io from 'socket.io-client'
 //import socket
 import SocketContext from "./socket";
 
+//import notifs
+import toast, { Toaster } from 'react-hot-toast';
+
 //lazy load game/admin components
 const Game = lazy(() => import('./components/game/game.js'));
 const Admin = lazy(() => import('./components/admin/admin.js'));
@@ -25,39 +28,42 @@ function App() {
   //socket from context
   const socket = React.useContext(SocketContext);
 
+  //states
   const [state, setState] = useState(0);
   const [username, setUsername] = useState('');
   const [code, setCode] = useState('');
   const [userDisp, setUserDisp] = useState('');
   const [clientIsBehind, setClientIsBehind] = useState(false);
+
+  
   //admin
   const createRoom = () => {
     socket.emit("room-start", code, socket.userID)
-    socket.on('roomStartSuccess', () => {
-      setState(1)
-    });
+    //socket.on('roomStartSuccess', () => {
+    //  setState(1)
+    //});
   };
   //player
   const joinRoom = () => {
     socket.emit('tryRoom', code);
-    socket.on('roomExists', () => {
-      setState(2);
-    })
+    //socket.on('roomExists', () => {
+    //  setState(2);
+    //})
   };
 
   const joinRoomFinal = () => {
     socket.emit('join-room', code, username, socket.userID);
-    socket.on('joinApproved', () => {
-      setState(3);
-    });
+    //socket.on('joinApproved', () => {
+    //  setState(3);
+    //});
   }
   
   const startGame = () => {
     socket.emit('startGame', socket.userID);
-    socket.on('gameStartedAdmin', () => {
-      //don't start game if less than 2 players
-      setState(4);
-    });
+    //socket.on('gameStartedAdmin', () => {
+    //  //don't start game if less than 2 players
+    //  setState(4);
+    //});
   }
 
   const kickPlayer = (id) => {
@@ -76,33 +82,74 @@ function App() {
   // 4 - admin component
   // 5 - trader component
   useEffect(() => {
-  socket.on('heartbeat', () => {
-    socket.emit('heartbeatResponse', socket.userID);
-  });
+    //app state changes
+    socket.on('roomStartSuccess', () => {
+      setState(1)
+    });
+    socket.on('roomExists', () => {
+      setState(2);
+    })
+    socket.on('joinApproved', () => {
+      setState(3);
+    });
+    socket.on('gameStartedAdmin', () => {
+      //don't start game if less than 2 players
+      setState(4);
+    });
 
-  socket.on("session", ({sessionID, userID, pageState, clientBehind}) => {
-    socket.auth = {sessionID};
-    sessionStorage.setItem("sessionID", sessionID);
-    socket.userID = userID;
-    sessionStorage.setItem("userID", userID);
-    setState(pageState);
-    setClientIsBehind(clientBehind);
+    //heartbeat
+    socket.on('heartbeat', () => {
+      socket.emit('heartbeatResponse', socket.userID);
+    });
 
-    if(pageState === 1) {
-      socket.emit('getAdminData', userID);
-    }
-  });
+    //persistent state
+    socket.on("session", ({sessionID, userID, pageState, clientBehind}) => {
+      socket.auth = {sessionID};
+      sessionStorage.setItem("sessionID", sessionID);
+      socket.userID = userID;
+      sessionStorage.setItem("userID", userID);
+      setState(pageState);
+      setClientIsBehind(clientBehind);
 
-  socket.on('giveAdminData', ({code, users}) => {
-    setCode(code);
-    setUserDisp(constructUserList(users));
-  });
 
-  socket.on('kickPlayer', (id) => {
-    if (id == socket.userID) {
+
+      if(pageState === 1) {
+        socket.emit('getAdminData', userID);
+      }
+    });
+
+    socket.on('giveAdminData', ({code, users}) => {
+      setCode(code);
+      setUserDisp(constructUserList(users));
+    });
+
+    socket.on('kickPlayer', (id) => {
+      if (id == socket.userID) {
+        setState(0);
+        toast.error('you have been kicked');
+      }
+    });
+
+    //errors
+    socket.on('roomNameTaken', () => {
+      console.log('-');
+      toast.error('room name taken!');
+    });
+
+    socket.on('noSuchRoom', () => {
+      let s = 'no room found with code: ' + code
+
+      toast.error(s);
+    });
+
+    // admin left? return to main menu
+    socket.on('roomClosed', () => {
+      console.log('??');
+      console.log(state);
       setState(0);
-    }
-  });
+      toast.error('admin left, room closed');
+    });
+    
   }, [socket]);
 
 
@@ -199,17 +246,21 @@ function App() {
   }
 
 
-  // admin left? return to main menu
-  if (state === 2 || state === 6  || state === 3) {
-    socket.on('roomClosed', () => {
-      setState(0);
-    });
-  }
-
   return (
     <div className="App">
       <header className="App-header">
-          {inputs}
+        <Toaster
+          toastOptions = {{
+            error: {
+              duration: 1500,
+              style: {
+                background: '#bf616a',
+                color: '#eceff4',
+              },
+            }
+          }}
+        />
+        {inputs}
         <Rules/>
         <a href="https://github.com/1rv/trader-titans" style={{ position: 'absolute', top: '4%', left: '2%' }}><img src={githubIcon} height='75%' width='75%'/></a>
       </header>
