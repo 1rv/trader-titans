@@ -70,3 +70,4 @@ npm start
 - mobile support, larger buttons and input screens
 - don't just put everything in the center of the screen
 - custom toasts(?) for aesthetics
+- add error for missing room name when someone tries to create room
