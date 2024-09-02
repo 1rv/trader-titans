@@ -38,6 +38,10 @@ function App() {
   
   //admin
   const createRoom = () => {
+    if(code.length == 0) {
+      toast.error('room code cannot be empty');
+      return;
+    }
     socket.emit("room-start", code, socket.userID)
     //socket.on('roomStartSuccess', () => {
     //  setState(1)
@@ -146,8 +150,6 @@ function App() {
 
     // admin left? return to main menu
     socket.on('roomClosed', () => {
-      console.log('??');
-      console.log(state);
       setState(0);
       toast.error('admin left, room closed');
     });
@@ -227,18 +229,17 @@ function App() {
         See your name on the board? Get ready to play!
       </>
   } else if (state === 4) {
-    inputs = <Suspense fallback = {<p>Loading...</p>}>
+    inputs =
       <Admin 
         room={code}
         setRoom={setCode}
         id={socket.userID}
         behind={clientIsBehind}
         setBehind={setClientIsBehind}
-      />
-    </Suspense>;
+      />;
   }
   else if (state === 5) {
-    inputs = <Suspense fallback = {<p>Loading...</p>}>
+    inputs =
       <Game 
         usn={username}
         setUsn={setUsername}
@@ -247,8 +248,7 @@ function App() {
         id={socket.userID}
         behind={clientIsBehind}
         setBehind={setClientIsBehind}
-      />
-    </Suspense>;
+      />;
   }
 
 

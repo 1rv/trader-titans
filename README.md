@@ -66,8 +66,10 @@ npm start
 - refactor some stuff
     - variables need renaming
     - a few legacy variables might be floating around
+- redesign the way event hooks are used
 - winner screen, not just the leaderboard, but show all scores after game ends
 - mobile support, larger buttons and input screens
 - don't just put everything in the center of the screen
 - custom toasts(?) for aesthetics
 - add error for missing room name when someone tries to create room
+
