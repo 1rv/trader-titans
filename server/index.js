@@ -120,7 +120,7 @@ io.on("connection", socket => {
     adminHeartbeats[ID] = setTimeout(() => {
       console.log('no response from admin ' + ID + ' for room ' + adminToRoom[ID] + ' , deleting...');
       destroyRoom(adminToRoom[ID], ID);
-    }, 30000);
+    }, 60000);
   };
 
 
@@ -166,6 +166,7 @@ io.on("connection", socket => {
     } else {
       setHeartbeatTimeout(userID);
       console.log('start heartbeat for', room);
+      console.log(userID);
 
       let roomData = {
         admin : userID,
@@ -278,7 +279,7 @@ io.on("connection", socket => {
   });
 
   //player game logic things 
-  socket.on('bid', (newSpread, username, rm, userID) => {
+  socket.on('bid', (newSpread, username, userID) => {
     let room = playerToRoom[userID]
     if (!roomsData[room].biddingOpen || newSpread > (0.9001*roomsData[room].spread)) {
       //bidding closed or bid not small enough, throw a fit
@@ -294,7 +295,7 @@ io.on("connection", socket => {
     }
   }); 
 
-  socket.on('startLineSetting', (rm, adminID) => {
+  socket.on('startLineSetting', (adminID) => {
     //tell market maker to set
     //tell admin setting has begun
     //tell other players to wait
@@ -324,7 +325,7 @@ io.on("connection", socket => {
     }
   });
 
-  socket.on('playerTrade', (type, username, rm, userID) => {
+  socket.on('playerTrade', (type, username, userID) => {
     //playerTrades : [],
     //playerRoundScores : [],
     //usernameToGameId: {},
@@ -348,7 +349,7 @@ io.on("connection", socket => {
     io.to(socket.id).emit('tradeRecievedPlayer');
   });
 
-  socket.on('tradingDone', (resolvePrice, rm, adminID) => {
+  socket.on('tradingDone', (resolvePrice, adminID) => {
     let room = adminToRoom[adminID];
 
     let mmIndex = 0;
@@ -406,11 +407,11 @@ io.on("connection", socket => {
 
     //change these to be to the room
     io.to(room).emit('roundResultsPlayer', idDiff);
-    socket.emit('roundResultsAdmin', topFive.slice(0, Math.min(topFive.length, 5)), [buys, sells, mmdiff]);
+    socket.emit('roundResultsAdmin', topFive.slice(0, Math.min(topFive.length, 5)), [buys, sells, mmdiff], roomsData[room].marketMaker);
     console.log(topFive.slice(0, Math.min(topFive.length, 5)));
   });
 
-  socket.on('restartRound', (rm, adminID) => {
+  socket.on('restartRound', (adminID) => {
     let room = adminToRoom[adminID];
     //change variables
     let n = roomsData[room].leaderboard.length;

@@ -5,7 +5,6 @@ import React from 'react';
 import Scorebar from '../scorebar/scorebar.js';
 import toast from 'react-hot-toast';
 
-import * as io from 'socket.io-client';
 import SocketContext from "../../socket";
 
 //import loading circle
@@ -29,7 +28,6 @@ export default function Game(props) {
   const [officialSpread, setOfficialSpread] = useState(0);
   const [waitingFor, setWaitingFor] = useState('round');
   const [myDiff, setMyDiff] = useState(0);
-  const [myUsername, setMyUsername] = useState(props.usn);
 
   socket.emit("requestRoom", props.room);
 
@@ -42,7 +40,7 @@ export default function Game(props) {
       toast.error('couldn\'t parse spread bid');
       return;
     } else {
-      socket.emit('bid', parseInt(mySpread), props.usn, props.room, userID);
+      socket.emit('bid', parseInt(mySpread), props.usn, userID);
     }
   }
 
@@ -63,10 +61,10 @@ export default function Game(props) {
   }
 
   const playerBuy = () => {
-    socket.emit('playerTrade', 'buy', props.usn, props.room, userID);
+    socket.emit('playerTrade', 'buy', props.usn, userID);
   }
   const playerSell = () => {
-    socket.emit('playerTrade', 'sell', props.usn, props.room, userID);
+    socket.emit('playerTrade', 'sell', props.usn, userID);
   }
 
   var display;
@@ -84,7 +82,6 @@ export default function Game(props) {
       console.log('got scoreboardData');
       setScore(score);
       props.setUsn(username);
-      setMyUsername(username);
     });
 
     socket.on('giveGameData', (gameData) => {
@@ -128,6 +125,10 @@ export default function Game(props) {
           setMyDiff(gameData.scoreChange); //I suspect this function is fishy.
           setState(4);
           break;
+        default:
+          //problem!
+          console.log(gameData);
+          return;
       }
     });
 
@@ -136,7 +137,7 @@ export default function Game(props) {
       setState(1);
     });
     socket.on('startLineSettingPlayer', (mmID) => {
-      if(userID != mmID) {
+      if(userID !== mmID) {
         setWaitingFor('Market Maker');
         setState(3);
       }
@@ -186,7 +187,6 @@ export default function Game(props) {
   useEffect(() => {
     socket.on('roundResultsPlayer', (idDiff) => {
       setMyDiff(idDiff[userID]);
-      let t = score+idDiff[userID];
       setScore(score + idDiff[userID]);
       setState(4);
       //console.log('--'); -> this will log many times - find a better solution
@@ -209,7 +209,7 @@ export default function Game(props) {
     display =
       <p>
         <h1>Bid:</h1>
-        <input id="newSpread" type="text" placeholder="your bid" autoFocus='true' value={mySpread} onChange={e=> setMySpread(e.target.value)}/>
+        <input id="newSpread" type="text" placeholder="your bid" value={mySpread} onChange={e=> setMySpread(e.target.value)}/>
         <Button variant="primary" onClick = {bid}>Bid</Button>
       </p>
   } else if (state === 1) {

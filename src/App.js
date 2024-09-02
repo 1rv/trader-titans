@@ -1,17 +1,14 @@
 import React from 'react';
-import { lazy, Suspense } from 'react';
 import { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 
-import logo from './logo.svg';
+//import logo from './logo.svg';
 import './App.css';
 
 //import components
 import Rules from './components/rules/rules.js';
 
 import githubIcon from './assets/github-mark.svg';
-
-import * as io from 'socket.io-client'
 
 //import socket
 import SocketContext from "./socket";
@@ -20,8 +17,10 @@ import SocketContext from "./socket";
 import toast, { Toaster } from 'react-hot-toast';
 
 //lazy load game/admin components
-const Game = lazy(() => import('./components/game/game.js'));
-const Admin = lazy(() => import('./components/admin/admin.js'));
+//const Game = lazy(() => import('./components/game/game.js'));
+//const Admin = lazy(() => import('./components/admin/admin.js'));
+import Game from './components/game/game.js';
+import Admin from './components/admin/admin.js';
 
 
 function App() {
@@ -38,7 +37,7 @@ function App() {
   
   //admin
   const createRoom = () => {
-    if(code.length == 0) {
+    if(code.length === 0) {
       toast.error('room code cannot be empty');
       return;
     }
@@ -70,14 +69,6 @@ function App() {
     //});
   }
 
-  const kickPlayer = (id) => {
-    //delete user for innapropriate name or something
-    socket.emit('kickPlayer', id);
-    console.log('kickPlayer', id);
-  }
-
-  let queryServer = false;
-
 
   // 0 - landing page/enter code
   // 1 - admin page before game start
@@ -104,6 +95,8 @@ function App() {
     //heartbeat
     socket.on('heartbeat', () => {
       socket.emit('heartbeatResponse', socket.userID);
+      console.log('hearbeatResponse');
+      console.log(socket.userID);
     });
 
     //persistent state
@@ -129,7 +122,7 @@ function App() {
     });
 
     socket.on('kickPlayer', (id) => {
-      if (id == socket.userID) {
+      if (id === socket.userID) {
         setState(0);
         toast.error('you have been kicked');
       }
@@ -158,24 +151,37 @@ function App() {
       toast.error('need at least 2 players to start');
     });
     
+    socket.on('updateUserDisp', users => {
+      setUserDisp(constructUserList(users));
+    });
+
+    socket.on('gameStartedPlayer', () => {
+      setState(5);
+    });
+
+    function constructUserList(users) {
+      if(users.length === 0) {
+        return;
+      }
+      const userElements = users.map((userData, index) => (
+        <span 
+          key={index} 
+          class="underline-on-hover" 
+          onClick = {() => kickPlayer(userData[0])}
+        > 
+          {userData[1]} 
+        </span>
+      ));
+      return userElements
+    }
+
+    const kickPlayer = (id) => {
+      //delete user for innapropriate name or something
+      socket.emit('kickPlayer', id);
+      console.log('kickPlayer', id);
+    }
   }, [socket]);
 
-
-  function constructUserList(users) {
-    if(users.length === 0) {
-      return;
-    }
-    const userElements = users.map((userData, index) => (
-      <span 
-        key={index} 
-        className="underline-on-hover" 
-        onClick = {() => kickPlayer(userData[0])}
-      > 
-        {userData[1]} 
-      </span>
-    ));
-    return userElements
-  }
 
   var inputs;
   //states
@@ -184,7 +190,7 @@ function App() {
       <>
         <input id="code" type="text" placeholder="type room code" autoFocus='true' 
           value={code} onChange={e=>setCode(e.target.value)}
-          maxlength="10"
+          maxLength="10"
         />
         <br></br>
         <span class='nowrap'>
@@ -194,11 +200,11 @@ function App() {
         <br></br>
         <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
-  } else if (state == 1) {
+  } else if (state === 1) {
     //admin
-    socket.on('updateUserDisp', users => {
-      setUserDisp(constructUserList(users));
-    });
+    //socket.on('updateUserDisp', users => {
+    //  setUserDisp(constructUserList(users));
+    //});
 
     inputs = 
       <>
@@ -221,9 +227,9 @@ function App() {
         <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
   } else if (state === 3) {
-    socket.on('gameStartedPlayer', () => {
-      setState(5);
-    });
+    //socket.on('gameStartedPlayer', () => {
+    //  setState(5);
+    //});
     inputs = 
       <>
         See your name on the board? Get ready to play!
@@ -253,8 +259,8 @@ function App() {
 
 
   return (
-    <div className="App">
-      <header className="App-header">
+    <div class="App">
+      <header class="App-header">
         <Toaster
           toastOptions = {{
             error: {
@@ -275,7 +281,7 @@ function App() {
         />
         {inputs}
         <Rules/>
-        <a href="https://github.com/1rv/trader-titans" style={{ position: 'absolute', top: '4%', left: '2%' }}><img src={githubIcon} height='75%' width='75%'/></a>
+        <a href="https://github.com/1rv/trader-titans" style={{ position: 'absolute', top: '4%', left: '2%' }}><img src={githubIcon} alt = "github" height='75%' width='75%'/></a>
       </header>
     </div>
   );
