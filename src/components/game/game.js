@@ -71,12 +71,14 @@ export default function Game(props) {
   
   //if behind, update state!
   const userID = props.id;
+
+  if(props.behind) {
+    socket.emit('getScoreBoardData', userID);
+    socket.emit('getGameData', userID);
+    props.setBehind(false);
+  }
+
   useEffect(() => {
-    if(props.behind) {
-      socket.emit('getScoreBoardData', userID);
-      socket.emit('getGameData', userID);
-      props.setBehind(false);
-    }
 
     socket.on('scoreBoardData', ({username, score}) => {
       console.log('got scoreboardData');

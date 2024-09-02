@@ -258,7 +258,10 @@ io.on("connection", socket => {
   socket.on("join-room", (room, username, userID) => {
     if (username === '') return;
     if (rooms.has(room)) {
-      if (Object.values(roomsData[room].usernames).includes(username)) {
+
+      if(roomsData[room].started == true) {
+        io.to(socket.id).emit('gameAlreadyStarted');
+      } else if (Object.values(roomsData[room].usernames).includes(username)) {
         console.log("username taken!");
         io.to(socket.id).emit('usernameTaken');
       } else {
@@ -279,7 +282,7 @@ io.on("connection", socket => {
   });
 
   //player game logic things 
-  socket.on('bid', (newSpread, username, userID) => {
+  socket.on('bid', (newSpread, usn, userID) => {
     let room = playerToRoom[userID]
     if (!roomsData[room].biddingOpen || newSpread > (0.9001*roomsData[room].spread)) {
       //bidding closed or bid not small enough, throw a fit
@@ -288,8 +291,9 @@ io.on("connection", socket => {
       console.log('null newSpread');
     } else {
       //really we should update admin socketid and only send to that but whatever... Security second
+      username = roomsData[room].usernames[userID];
       roomsData[room].spread = newSpread;
-      roomsData[room].marketMaker = username;
+      roomsData[room].marketMaker = roomsData[room].usernames[userID];
       roomsData[room].marketMakerId = userID;
       io.to(room).emit('bidAccepted', newSpread, username, userID);
     }

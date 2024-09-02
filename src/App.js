@@ -92,6 +92,10 @@ function App() {
       setState(4);
     });
 
+    socket.on('gameAlreadyStarted', () => {
+      toast.error('game already started');
+    });
+
     //heartbeat
     socket.on('heartbeat', () => {
       socket.emit('heartbeatResponse', socket.userID);
