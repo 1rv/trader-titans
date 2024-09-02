@@ -73,3 +73,5 @@ npm start
 - custom toasts(?) for aesthetics
 - add error for missing room name when someone tries to create room
 
+## known bugs
+- if a player gets kicked from the room, and they start a room with the same code, they will be sent to the player screen instead of the admin screen
