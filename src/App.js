@@ -104,6 +104,7 @@ function App() {
 
     //persistent state
     socket.on("session", ({sessionID, userID, pageState, clientBehind}) => {
+      console.log(userID);
       socket.auth = {sessionID};
       sessionStorage.setItem("sessionID", sessionID);
       socket.userID = userID;

@@ -7,10 +7,6 @@ import toast from 'react-hot-toast';
 
 import * as io from 'socket.io-client';
 import SocketContext from "../../socket";
-const socket = io.connect(
-  process.env.NODE_ENV === 'production' ? `${process.env.REACT_APP_SERVER_URL}` : 'http://localhost:4000'
-);
-
 
 //import loading circle
 
@@ -37,6 +33,7 @@ export default function Game(props) {
 
   socket.emit("requestRoom", props.room);
 
+
   
   //trade parseInt for parseDouble
   const bid = () => {
@@ -45,7 +42,7 @@ export default function Game(props) {
       toast.error('couldn\'t parse spread bid');
       return;
     } else {
-      socket.emit('bid', parseInt(mySpread), props.usn, props.room, props.id);
+      socket.emit('bid', parseInt(mySpread), props.usn, props.room, userID);
     }
   }
 
@@ -62,23 +59,24 @@ export default function Game(props) {
       toast.error('couldn\'t parse line');
       return;
     }
-    socket.emit('marketMakerSetLine', myBidPrice, myAskPrice, props.room);
+    socket.emit('marketMakerSetLine', myBidPrice, myAskPrice, props.room, userID);
   }
 
   const playerBuy = () => {
-    socket.emit('playerTrade', 'buy', props.usn, props.room);
+    socket.emit('playerTrade', 'buy', props.usn, props.room, userID);
   }
   const playerSell = () => {
-    socket.emit('playerTrade', 'sell', props.usn, props.room);
+    socket.emit('playerTrade', 'sell', props.usn, props.room, userID);
   }
 
   var display;
   
   //if behind, update state!
+  const userID = props.id;
   useEffect(() => {
     if(props.behind) {
-      socket.emit('getScoreBoardData', props.id);
-      socket.emit('getGameData', props.id);
+      socket.emit('getScoreBoardData', userID);
+      socket.emit('getGameData', userID);
       props.setBehind(false);
     }
 
@@ -101,7 +99,6 @@ export default function Game(props) {
           break;
         case 'bidding-down-spread':
           setState(0);
-          console.log(state);
           break;
         case 'market-maker-setting-line':
           if(gameData.isMarketMaker) {
@@ -139,7 +136,7 @@ export default function Game(props) {
       setState(1);
     });
     socket.on('startLineSettingPlayer', (mmID) => {
-      if(props.id != mmID) {
+      if(userID != mmID) {
         setWaitingFor('Market Maker');
         setState(3);
       }
@@ -164,14 +161,6 @@ export default function Game(props) {
     socket.on('startBiddingPlayer', () => {
       setState(0);
     });
-    socket.on('roundResultsPlayer', (idDiff) => {
-      console.log(props.id, idDiff, idDiff[props.id]);
-      setMyDiff(idDiff[props.id]);
-      //setScore(score+usnDiff[props.usn]); no idea why but this doens't work
-      let t = score+idDiff[props.id];
-      setScore(t);
-      setState(4);
-    });
     socket.on('restartRoundPlayer', () => {
       setWaitingFor('round');
       setMyBidPrice(NaN);
@@ -186,12 +175,24 @@ export default function Game(props) {
       toast.error('spread must be at least 10% smaller');
     });
 
-    socket.on('bidAccepted', (newSpread, username, userID) => {
-      if(userID === props.id) {
+    socket.on('bidAccepted', (newSpread, username, uID) => {
+      if(uID === userID) {
         toast.success('bid successful at ' + newSpread);
       }
     });
   }, [socket]);
+
+
+  useEffect(() => {
+    socket.on('roundResultsPlayer', (idDiff) => {
+      setMyDiff(idDiff[userID]);
+      let t = score+idDiff[userID];
+      setScore(score + idDiff[userID]);
+      setState(4);
+      //console.log('--'); -> this will log many times - find a better solution
+    });
+  }, [score, socket, userID]);
+
   //0: bidding down spread, 1: setting line, 2: buy/selling, 3: waiting for various things, 4: leaderboard
   
   if (state === 0) {

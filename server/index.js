@@ -101,6 +101,7 @@ io.on("connection", socket => {
   }
 
   console.log("inferredState after calculation", inferredState);
+  console.log(socket.userID);
   socket.emit("session", {
     sessionID: socket.sessionID,
     userID: socket.userID,
@@ -277,7 +278,8 @@ io.on("connection", socket => {
   });
 
   //player game logic things 
-  socket.on('bid', (newSpread, username, room, userID) => {
+  socket.on('bid', (newSpread, username, rm, userID) => {
+    let room = playerToRoom[userID]
     if (!roomsData[room].biddingOpen || newSpread > (0.9001*roomsData[room].spread)) {
       //bidding closed or bid not small enough, throw a fit
       io.to(socket.id).emit('spreadTooLarge');
@@ -292,11 +294,12 @@ io.on("connection", socket => {
     }
   }); 
 
-  socket.on('startLineSetting', (room) => {
+  socket.on('startLineSetting', (rm, adminID) => {
     //tell market maker to set
     //tell admin setting has begun
     //tell other players to wait
     //close bidding
+    let room = adminToRoom[adminID];
     mmID = roomsData[room].marketMakerId;
 
     io.to(room).emit('startLineSettingAdmin');
@@ -306,7 +309,8 @@ io.on("connection", socket => {
     roomsData[room].gameState = 'market-maker-setting-line';
   });
 
-  socket.on('marketMakerSetLine', (bidPrice, askPrice, room) => {
+  socket.on('marketMakerSetLine', (bidPrice, askPrice, rm, userID) => {
+    let room = playerToRoom[userID];
     if(Math.abs((askPrice-bidPrice) - roomsData[room].spread) > (0.001*roomsData[room].spread)) {
       console.log('marketMakerSetLine failed');
       //not confirmed
@@ -320,10 +324,14 @@ io.on("connection", socket => {
     }
   });
 
-  socket.on('playerTrade', (type, username, room) => {
+  socket.on('playerTrade', (type, username, rm, userID) => {
     //playerTrades : [],
     //playerRoundScores : [],
     //usernameToGameId: {},
+    let room = playerToRoom[userID];
+    console.log('playerToRoom', playerToRoom);
+    console.log(userID);
+    console.log('room: ', room);
 
     let playerId = roomsData[room].usernameToGameId[username] //index of player
     if (roomsData[room].playerTrades[playerId] != 0) return; //already made a trade! reject it
@@ -340,7 +348,9 @@ io.on("connection", socket => {
     io.to(socket.id).emit('tradeRecievedPlayer');
   });
 
-  socket.on('tradingDone', (resolvePrice, room) => {
+  socket.on('tradingDone', (resolvePrice, rm, adminID) => {
+    let room = adminToRoom[adminID];
+
     let mmIndex = 0;
     let mmdiff = 0;
     let diffs = new Array(roomsData[room].leaderboard.length).fill(0);
@@ -400,9 +410,10 @@ io.on("connection", socket => {
     console.log(topFive.slice(0, Math.min(topFive.length, 5)));
   });
 
-  socket.on('restartRound', (room) => {
+  socket.on('restartRound', (rm, adminID) => {
+    let room = adminToRoom[adminID];
     //change variables
-    let n = roomsData[room].leaderboard.length
+    let n = roomsData[room].leaderboard.length;
     roomsData[room].playerTrades = new Array(n).fill(0);
     roomsData[room].playerRoundScores = new Array(n).fill(0);
     roomsData[room].round += 1;

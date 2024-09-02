@@ -136,7 +136,7 @@ export default function Admin(props) {
       toast.error('no market maker');
       return;
     }
-    socket.emit('startLineSetting', props.room);
+    socket.emit('startLineSetting', props.room, props.id);
     //socket.on('startLineSettingAdmin', () => {
     //  setWaitingFor('Waiting for Market Maker...');
     //  setAdminState(2);
@@ -151,14 +151,14 @@ export default function Admin(props) {
 
     let rp = parseInt(resolvePrice);
     if (!isNaN(rp)) {
-      socket.emit('tradingDone', rp, props.room);
+      socket.emit('tradingDone', rp, props.room, props.id);
     } else {
       toast.error('resolve price not a number');
     }
   }
 
   const restartRound = () => {
-    socket.emit('restartRound', props.room);
+    socket.emit('restartRound', props.room, props.id);
   }
 
   //------
