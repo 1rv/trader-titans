@@ -1,17 +1,24 @@
 ## Market Sizing
-- How many churches are in state X? [data here](https://www.statista.com/statistics/245432/number-of-religious-congregations-in-the-us-by-state/)
-- How many students are there at university X?
-- What is the (annualized) budget of state X (in millions)? what is the budget per capita? [data here](https://en.wikipedia.org/wiki/List_of_U.S._state_budgets)
-- How many (registered) vehichles are there in the US? [data here](https://www.consumeraffairs.com/automotive/how-many-cars-are-in-the-us.html)
+- Religion
+    - How many churches are in state X? [data here](https://www.statista.com/statistics/245432/number-of-religious-congregations-in-the-us-by-state/)
+    - How much money does religion X have (LDS/~~Catholic~~/Seventh-Day Adventist/Church of England/Church of Sweden/Catholic Church of Australia)
+- University:
+    - How many students are there at university X?
+    - What is the endowment of university X? [data here](https://en.wikipedia.org/wiki/List_of_colleges_and_universities_in_the_United_States_by_endowment)
 - Government:
     - What is the population of city X? (in thousands)
     - How many of X franchise restaurant are there in the world? What is their revenue (in millions USD?) [data here](https://en.wikipedia.org/wiki/List_of_the_largest_fast_food_restaurant_chains)
     - Number of staffers working for the House of Representatives? How many specifically for the Democrats? [data here](https://www.legistorm.com/congress_by_numbers/index/by/house/mode/race/term_id/64.html)
-    - Average age of staffers (in months)? Answer: ||32*12|| [data here](https://www.legistorm.com/congress_by_numbers/index/by/house/mode/race/term_id/64.html)
-    - Average age of House of Representatives member (in months)? Only Democrats? Only Republicans? Answer: ||55*12, 58*12, 53*12 respectively|| [data here](https://www.legistorm.com/congress_by_numbers/index/by/house/mode/race/term_id/64.html)
+    - Average age of staffers (in months)? Answer: 32\*12 [data here](https://www.legistorm.com/congress_by_numbers/index/by/house/mode/race/term_id/64.html)
+    - Average age of House of Representatives member (in months)? Only Democrats? Only Republicans? Answer: 55\*12, 58\*12, 53\*12 respectively [data here](https://www.legistorm.com/congress_by_numbers/index/by/house/mode/race/term_id/64.html)
+    - What is the (annualized) budget of state X (in millions)? what is the budget per capita? [data here](https://en.wikipedia.org/wiki/List_of_U.S._state_budgets)
+    - How many (registered) vehichles are there in the US? [data here](https://www.consumeraffairs.com/automotive/how-many-cars-are-in-the-us.html)
 - Finance:
     - What is the AUM of X hedge fund (billions/hundred-millions)? [data here](https://en.wikipedia.org/wiki/List_of_hedge_funds)
     - Total assets of bank X (billions)? [data here](https://en.wikipedia.org/wiki/List_of_largest_banks)
+    - How much revenue does company X bring in per year (tens/hundreds millions USD)? How many employees (hundreds/thousands)? [data here](https://en.wikipedia.org/wiki/List_of_largest_companies_in_the_United_States_by_revenue#List_of_the_largest_public_/_publicly_traded_companies)
+    - What is the market cap of X tech company (billions/hundred-millions/ten-millions)? [data here](https://en.wikipedia.org/wiki/List_of_the_largest_software_companies)
+    - 
 - Alcohol:
     - How many gallons of wine does the US consume in a year (all types, or only ones < 14% ABV?)? [data here](https://wineinstitute.org/our-industry/statistics/us-wine-consumption/)
     - How many breweries are there in the US (regional craft/microbreweries/taprooms/brewpubs/large & non-craft/total)? [data here](https://www.brewersassociation.org/statistics-and-data/national-beer-stats/)
@@ -25,6 +32,15 @@
     - Number of days that Ed Sheeran's "Shape of You" was the number 1 most streamed song? Drake's "One Dance"? Major Lazer's "Lean On"? [data here](https://en.wikipedia.org/wiki/List_of_Spotify_streaming_records#Historical_most-streamed_songs)
     - Copies of album X sold (hundred-thousands)? [data here](https://en.wikipedia.org/wiki/List_of_best-selling_albums)
     - Highest number of streams for a song in a single day (that is a non-seasonal/holiday song)? [data here](https://en.wikipedia.org/wiki/List_of_Spotify_streaming_records#Milestones_and_achievements_for_songs)
+- Movies:
+    - How much money did X film gross (millions)? [data here](https://en.wikipedia.org/wiki/List_of_highest-grossing_films#Highest-grossing_films)
+    - How much money did franchise X gross (millions)? [data here](https://en.wikipedia.org/wiki/List_of_highest-grossing_films#Highest-grossing_franchises_and_film_series)
+    -
+- Games:
+    - How many copies did X game sell for the [PC](https://en.wikipedia.org/wiki/List_of_best-selling_PC_games) (thousands)? [Nintendo Switch?](https://en.wikipedia.org/wiki/List_of_best-selling_Nintendo_Switch_video_games) [PS5?](https://en.wikipedia.org/wiki/List_of_best-selling_PlayStation_5_video_games) [Xbox One?](https://en.wikipedia.org/wiki/List_of_best-selling_Xbox_One_video_games)
+- Wildlife:
+    - How many of X mammal are there? [data here](https://en.wikipedia.org/wiki/Lists_of_mammals_by_population)
+    - 
 
 ## prediction markets
 Resolve the price at the probability settled by prediction market. 
