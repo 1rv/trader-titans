@@ -132,6 +132,9 @@ io.on("connection", socket => {
   });
 
   function destroyRoom(room, adminID) {
+    if(!room || !roomsData[room]) {
+      return;
+    }
     console.log('destroying room ', room);
     rooms.delete(room);
 
@@ -155,6 +158,7 @@ io.on("connection", socket => {
 
   //admin
   socket.on("room-start", (room, userID) => {
+    if(!room) return;
     if(room.length === 0) return;
 
 
