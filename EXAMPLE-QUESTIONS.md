@@ -15,6 +15,7 @@
     - What is the (annualized) budget of state X (in millions)? what is the budget per capita? [data here](https://en.wikipedia.org/wiki/List_of_U.S._state_budgets)
     - How many (registered) vehichles are there in the US? [data here](https://www.consumeraffairs.com/automotive/how-many-cars-are-in-the-us.html)
     - How many people are there in the [US](https://en.wikipedia.org/wiki/Lists_of_most_common_surnames_in_North_American_countries#United_States) with the last name X? [Canada](https://en.m.wikipedia.org/wiki/Lists_of_most_common_surnames_in_North_American_countries#Canada)? [Mexico](https://en.m.wikipedia.org/wiki/Lists_of_most_common_surnames_in_North_American_countries#Mexico)? [Other countries](https://en.wikipedia.org/wiki/Lists_of_most_common_surnames)?
+    - Military size of X country? Active? Reserve? Paramilitary? Total? [data here](https://en.wikipedia.org/wiki/List_of_countries_by_number_of_military_and_paramilitary_personnel#List_by_the_International_Institute_for_Strategic_Studies)
 - Finance:
     - What is the AUM of X hedge fund (billions/hundred-millions)? [data here](https://en.wikipedia.org/wiki/List_of_hedge_funds)
     - Total assets of bank X (billions)? [data here](https://en.wikipedia.org/wiki/List_of_largest_banks)
@@ -22,6 +23,8 @@
     - What is the market cap of X tech company (billions/hundred-millions/ten-millions)? [data here](https://en.wikipedia.org/wiki/List_of_the_largest_software_companies)
     - How many (centrally cleared) options and futures contracts were traded yesterday/last day the market was open (thousands)? How many futures? How many equity options? How many index options? Last month? Last year? [data here](https://www.theocc.com/market-data/market-data-reports/volume-and-open-interest/historical-volume-statistics)
     - How many per exchange? How many [Options on Futures (OOFs)](https://www.cmegroup.com/education/whitepapers/fundamentals-of-options-on-futures.html)? [data here](https://www.theocc.com/market-data/market-data-reports/volume-and-open-interest/daily-volume)
+    - How much value in centrally-cleared securities lending (OCC Stock Loan program)? [data here](https://www.theocc.com/market-data/market-data-reports/volume-and-open-interest/stock-loan-volume)
+    - How many options were traded on X underlying? [data here](https://www.optionseducation.org/toolsoptionquotes/trending-options-volume)
     - Revenue of X law firm? Revenue per lawyer? Profit per partner? [data here](https://en.wikipedia.org/wiki/List_of_largest_law_firms_by_revenue)
     - How much was X firm's acquisition of Y firm? [data here](https://en.wikipedia.org/wiki/List_of_largest_mergers_and_acquisitions#2020s)
 - Alcohol:
@@ -41,7 +44,6 @@
 - Movies:
     - How much money did X film gross (millions)? [data here](https://en.wikipedia.org/wiki/List_of_highest-grossing_films#Highest-grossing_films)
     - How much money did franchise X gross (millions)? [data here](https://en.wikipedia.org/wiki/List_of_highest-grossing_films#Highest-grossing_franchises_and_film_series)
-    -
 - Games:
     - How many copies did X game sell for the [PC](https://en.wikipedia.org/wiki/List_of_best-selling_PC_games) (thousands)? [Nintendo Switch](https://en.wikipedia.org/wiki/List_of_best-selling_Nintendo_Switch_video_games)? [PS5](https://en.wikipedia.org/wiki/List_of_best-selling_PlayStation_5_video_games)? [Xbox One](https://en.wikipedia.org/wiki/List_of_best-selling_Xbox_One_video_games)?
 - Wildlife:
@@ -52,28 +54,6 @@
     - How many [Twitter/X](https://en.wikipedia.org/wiki/List_of_most-followed_Twitter_accounts) followers does X account have? [Instagram](https://en.wikipedia.org/wiki/List_of_most-followed_Instagram_accounts)? [TikTok](https://en.wikipedia.org/wiki/List_of_most-followed_TikTok_accounts) follows and likes?
 - History:
     - How large was X empire by land area (thousand sq miles/thousand sq km)? [data here](https://en.wikipedia.org/wiki/List_of_largest_empires)
-    - 
-
-## prediction markets
-Resolve the price at the probability settled by prediction market. 
-Trade on the probability that some event occurs. Feel free to multiply the
-number by 10 if you want to increase the numebrs a bit (i.e. bet on permille instead of percent)
-
-These can get pretty silly and are a lot of fun.
-
-[Prediction Markets are suprisingly accurate!](https://www.astralcodexten.com/p/prediction-market-faq?open=false#%C2%A7why-believe-prediction-markets-are-accurate)
-
-- [Probability that Kamala will win the popular vote?](https://polymarket.com/event/presidential-election-popular-vote-winner-2024)
-- [Probability that Trump will win the election?](https://polymarket.com/event/presidential-election-popular-vote-winner-2024)
-- [Probability that Ohio state will be CFB champion in 2025?](https://polymarket.com/event/college-football-champion-2025)
-- [Probability that Barron Trump attends NYU?](https://polymarket.com/event/will-barron-trump-attend-nyu)
-- [Probability that Andrew Tate is found guilty of human trafficking in 2024?](https://polymarket.com/event/andrew-tate-guilty-of-human-trafficking-in-2024)
-- [Probability that Sundar Pichai is out as Google CEO in 2024?](https://polymarket.com/event/sundar-pichai-out-as-google-ceo-in-2024)
-- [Probability that the 2024 presidential election is decided by fewer than 100k votes?](https://manifold.markets/EricNeyman/will-the-2024-presidential-election-o2np2rj8v9)
-- [Probability that a member of US congress dies in 2025?](https://manifold.markets/Ernie/will-a-member-of-united-states-cong-usb9ympnzk)
-- [Probability that Wordle remains free to play through 2025?](https://manifold.markets/Sketchy/will-wordle-remain-free-to-play-thr)
-- [Probability that GPT-5 is released before 2025?](https://manifold.markets/VictorLJZ/will-gpt5-be-released-before-2025)
-- [Probability that China launches a full-scale invasion of Taiwan before 2030?](https://manifold.markets/MetaculusBot/will-china-launch-a-fullscale-invas)
 
 ## fun
 "my" refers to the admin of the game.
@@ -101,3 +81,25 @@ These can get pretty silly and are a lot of fun.
 - Word count of my last essay?
 - Word count of chat gpt response to the prompt "X"?
 - Number of dollars I made at my summer internship (before tax)?
+
+## prediction markets
+Resolve the price at the probability settled by prediction market. 
+Trade on the probability that some event occurs. Feel free to multiply the
+number by 10 if you want to increase the numebrs a bit (i.e. bet on permille instead of percent)
+
+These can get pretty silly and are a lot of fun.
+
+[Prediction Markets are suprisingly accurate!](https://www.astralcodexten.com/p/prediction-market-faq?open=false#%C2%A7why-believe-prediction-markets-are-accurate)
+
+- [Probability that Kamala will win the popular vote?](https://polymarket.com/event/presidential-election-popular-vote-winner-2024)
+- [Probability that Trump will win the election?](https://polymarket.com/event/presidential-election-popular-vote-winner-2024)
+- [Probability that Ohio state will be CFB champion in 2025?](https://polymarket.com/event/college-football-champion-2025)
+- [Probability that Barron Trump attends NYU?](https://polymarket.com/event/will-barron-trump-attend-nyu)
+- [Probability that Andrew Tate is found guilty of human trafficking in 2024?](https://polymarket.com/event/andrew-tate-guilty-of-human-trafficking-in-2024)
+- [Probability that Sundar Pichai is out as Google CEO in 2024?](https://polymarket.com/event/sundar-pichai-out-as-google-ceo-in-2024)
+- [Probability that the 2024 presidential election is decided by fewer than 100k votes?](https://manifold.markets/EricNeyman/will-the-2024-presidential-election-o2np2rj8v9)
+- [Probability that a member of US congress dies in 2025?](https://manifold.markets/Ernie/will-a-member-of-united-states-cong-usb9ympnzk)
+- [Probability that Wordle remains free to play through 2025?](https://manifold.markets/Sketchy/will-wordle-remain-free-to-play-thr)
+- [Probability that GPT-5 is released before 2025?](https://manifold.markets/VictorLJZ/will-gpt5-be-released-before-2025)
+- [Probability that China launches a full-scale invasion of Taiwan before 2030?](https://manifold.markets/MetaculusBot/will-china-launch-a-fullscale-invas)
+
