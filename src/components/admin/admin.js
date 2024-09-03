@@ -86,7 +86,7 @@ export default function Admin(props) {
       setAdminState(2);
     });
 
-    socket.on('bidAccepted', (newSpread, username) => {
+    socket.on('bidAccepted', (newSpread, userID, username) => {
       console.log('gotbidaccepted');
       setMarketMaker(username);
       setSpread(newSpread);
@@ -163,7 +163,7 @@ export default function Admin(props) {
     display = 
       <>
         <h1>Topic:</h1>
-        <input id="topic" type="text" placeholder="topic" autoFocus='true' value={topic} onChange={e=> setTopic(e.target.value)}/>
+        <input id="topic" type="text" placeholder="topic" autoFocus={true} value={topic} onChange={e=> setTopic(e.target.value)}/>
         <Button variant="primary" onClick = {startBidding}>Start Bidding</Button>
       </>
   } else if (adminState === 1) {
@@ -200,7 +200,7 @@ export default function Admin(props) {
         <h1>{waitingFor}</h1>
         <h2>{marketString}</h2>
         <h2>{traderString}</h2>
-        <input id="Resolve Price" type="text" placeholder="Resolve Price" autoFocus='true' onChange={e=> setResolvePrice(e.target.value)}/> 
+        <input id="Resolve Price" type="text" placeholder="Resolve Price" autoFocus={true} onChange={e=> setResolvePrice(e.target.value)}/> 
         <Button variant="primary" onClick = {tradingDone}>Resolve</Button>
       </>
   } else if (adminState === 3) {

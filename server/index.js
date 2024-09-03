@@ -171,7 +171,7 @@ io.on("connection", socket => {
       let roomData = {
         admin : userID,
         usernames : {}, //userID -> username. We don't want empty username, so ill just make it perma unavailable.
-        usernameToGameId: {},
+        userIDToGameIndex: {},
         leaderboard : [], //array of usernames
         playerTrades : [],
         playerRoundScores : [],
@@ -188,7 +188,7 @@ io.on("connection", socket => {
         bid : 0,
         ask : 0,
         marketMaker : '',
-        marketMakerId : userID,
+        marketMakerID : userID,
         topic : '',
         gameState : 'setting-topic', //'setting-topic', 'bidding-down-spread', 
                                     //'market-maker-setting-line', 'trading', 'round-stats'
@@ -211,21 +211,21 @@ io.on("connection", socket => {
     let numPlayers = Object.keys(roomsData[adminToRoom[adminUserID]].usernames).length;
     if (numPlayers > 1) {
       room = adminToRoom[adminUserID]
-      io.to(socket.id).emit('gameStartedAdmin');
       io.to(room).emit('gameStartedPlayer');
+      io.to(socket.id).emit('gameStartedAdmin');
       roomsData[room].started = true;
       roomsData[room].round = 1;
 
       //create user data
-      let usernames = Object.values(roomsData[room].usernames)
-      for (let i = 0; i < usernames.length; i++) {
-        roomsData[room].usernameToGameId[usernames[i]] = i;
-        roomsData[room].leaderboard[i] = new Player(usernames[i], i, 0);
+      let userIDs = Object.keys(roomsData[room].usernames)
+      for (let i = 0; i < userIDs.length; i++) {
+        roomsData[room].userIDToGameIndex[userIDs[i]] = i;
+        roomsData[room].leaderboard[i] = new Player(roomsData[room].usernames[userIDs[i]], i, 0);
       }
-      roomsData[room].playerTrades = new Array(usernames.length).fill(0);
-      roomsData[room].playerRoundScores = new Array(usernames.length).fill(0);
-      roomsData[room].playerScores = new Array(usernames.length).fill(0);
-      roomsData[room].traderCt = usernames.length-1;
+      roomsData[room].playerTrades = new Array(userIDs.length).fill(0);
+      roomsData[room].playerRoundScores = new Array(userIDs.length).fill(0);
+      roomsData[room].playerScores = new Array(userIDs.length).fill(0);
+      roomsData[room].traderCt = userIDs.length-1;
     } else {
       io.to(socket.id).emit('tooFewPlayersToStart');
     }
@@ -249,7 +249,11 @@ io.on("connection", socket => {
   //player
   socket.on('tryRoom', (room) => {
     if (rooms.has(room)) {
-      io.to(socket.id).emit('roomExists');
+      if(roomsData[room].started == true) {
+        io.to(socket.id).emit('gameAlreadyStarted');
+      } else { 
+        io.to(socket.id).emit('roomExists');
+      }
     } else {
       io.to(socket.id).emit('noSuchRoom');
     }
@@ -258,7 +262,6 @@ io.on("connection", socket => {
   socket.on("join-room", (room, username, userID) => {
     if (username === '') return;
     if (rooms.has(room)) {
-
       if(roomsData[room].started == true) {
         io.to(socket.id).emit('gameAlreadyStarted');
       } else if (Object.values(roomsData[room].usernames).includes(username)) {
@@ -282,7 +285,7 @@ io.on("connection", socket => {
   });
 
   //player game logic things 
-  socket.on('bid', (newSpread, usn, userID) => {
+  socket.on('bid', (newSpread, userID) => {
     let room = playerToRoom[userID]
     if (!roomsData[room].biddingOpen || newSpread > (0.9001*roomsData[room].spread)) {
       //bidding closed or bid not small enough, throw a fit
@@ -294,8 +297,8 @@ io.on("connection", socket => {
       username = roomsData[room].usernames[userID];
       roomsData[room].spread = newSpread;
       roomsData[room].marketMaker = roomsData[room].usernames[userID];
-      roomsData[room].marketMakerId = userID;
-      io.to(room).emit('bidAccepted', newSpread, username, userID);
+      roomsData[room].marketMakerID = userID;
+      io.to(room).emit('bidAccepted', newSpread, userID, username);
     }
   }); 
 
@@ -305,10 +308,10 @@ io.on("connection", socket => {
     //tell other players to wait
     //close bidding
     let room = adminToRoom[adminID];
-    mmID = roomsData[room].marketMakerId;
+    mmID = roomsData[room].marketMakerID;
 
     io.to(room).emit('startLineSettingAdmin');
-    io.to(roomsData[room].marketMakerId).emit('startLineSettingMarketMaker', roomsData[room].spread);
+    io.to(roomsData[room].marketMakerID).emit('startLineSettingMarketMaker', roomsData[room].spread);
     socket.to(room).emit('startLineSettingPlayer', mmID);
     roomsData[room].biddingOpen = false;
     roomsData[room].gameState = 'market-maker-setting-line';
@@ -320,25 +323,22 @@ io.on("connection", socket => {
       console.log('marketMakerSetLine failed');
       //not confirmed
     } else {
-      io.to(roomsData[room].marketMakerId).emit('marketMakerLineConfirmed');
+      io.to(roomsData[room].marketMakerID).emit('marketMakerLineConfirmed');
       io.to(room).emit('lineSetAdmin', bidPrice, askPrice);
-      socket.broadcast.to(room).emit('startBuySellPlayer', roomsData[room].marketMaker, bidPrice, askPrice);
+      socket.broadcast.to(room).emit('startBuySellPlayer', roomsData[room].marketMakerID, bidPrice, askPrice);
       roomsData[room].bid = bidPrice;
       roomsData[room].ask = askPrice;
       roomsData[room].gameState = 'trading';
     }
   });
 
-  socket.on('playerTrade', (type, username, userID) => {
+  socket.on('playerTrade', (type, userID) => {
     //playerTrades : [],
     //playerRoundScores : [],
-    //usernameToGameId: {},
+    //userIDToGameIndex: {},
     let room = playerToRoom[userID];
-    console.log('playerToRoom', playerToRoom);
-    console.log(userID);
-    console.log('room: ', room);
 
-    let playerId = roomsData[room].usernameToGameId[username] //index of player
+    let playerId = roomsData[room].userIDToGameIndex[userID] //index of player
     if (roomsData[room].playerTrades[playerId] != 0) return; //already made a trade! reject it
     if (type === 'buy') {
       roomsData[room].playerTrades[playerId] = 1 //1 - buy
@@ -361,10 +361,15 @@ io.on("connection", socket => {
     let diffs = new Array(roomsData[room].leaderboard.length).fill(0);
     let buys = 0;
     let sells = 0;
+    console.log(roomsData[room].playerTrades);
     for (let i = 0; i < roomsData[room].playerTrades.length; i++) { //playerTrades length should be same as leaderboard...
-      if (i === roomsData[room].usernameToGameId[roomsData[room].marketMaker]) {
+      console.log(i, roomsData[room].playerTrades[i]);
+      console.log(roomsData[room].userIDToGameIndex[roomsData[room].marketMakerID]);
+      if (i === roomsData[room].userIDToGameIndex[roomsData[room].marketMakerID]) {
         mmIndex = i;
+        console.log('mm');
       } else if (roomsData[room].playerTrades[i] === 1) { //Buys
+        console.log('buy');
         let pnl = resolvePrice - roomsData[room].ask;
         roomsData[room].leaderboard[i].score += pnl;
         //may not need this next line
@@ -374,6 +379,7 @@ io.on("connection", socket => {
         buys += 1;
         diffs[i] = pnl;
       } else if (roomsData[room].playerTrades[i] === 2) { //Sells
+        console.log('sell');
         let pnl = roomsData[room].bid - resolvePrice;
         roomsData[room].leaderboard[i].score += pnl;
         //may not need this next line
@@ -383,6 +389,7 @@ io.on("connection", socket => {
         diffs[i] = pnl;
         sells += 1;
       } else {
+        console.log('nothing');
         //didn't play... lose 10%
         roomsData[room].leaderboard[i].score -= (roomsData[room].spread*0.1);
         roomsData[room].playerRoundScores[i] -= (roomsData[room].spread*0.1);
@@ -394,10 +401,11 @@ io.on("connection", socket => {
     roomsData[room].playerScores[mmIndex] += mmdiff;
     diffs[mmIndex] = mmdiff;
 
+
     //create stuff for admin/players
     let idDiff = {}
     for (const id of Object.keys(roomsData[room].usernames)) {
-      idDiff[id] = diffs[roomsData[room].usernameToGameId[roomsData[room].usernames[id]]];
+      idDiff[id] = diffs[roomsData[room].userIDToGameIndex[id]];
     }
 
     let topFive = [...roomsData[room].leaderboard];
@@ -451,7 +459,7 @@ io.on("connection", socket => {
   socket.on('getScoreBoardData', (userID) => {
     room = playerToRoom[userID];
     usn = roomsData[room].usernames[userID];
-    index = roomsData[room].usernameToGameId[usn];
+    index = roomsData[room].userIDToGameIndex[userID];
     scr = roomsData[room].playerScores[index];
     io.to(userID).emit("scoreBoardData", {
       username: usn,
@@ -503,20 +511,20 @@ io.on("connection", socket => {
     } else {
       //player
       usn = roomsData[room].usernames[userID];
-      index = roomsData[room].usernameToGameId[usn];
+      index = roomsData[room].userIDToGameIndex[userID];
       switch (state) {
         case 'setting-topic':
           break;
         case 'bidding-down-spread':
           break;
         case 'market-maker-setting-line':
-          gameData.isMarketMaker = roomsData[room].marketMakerId === userID;
+          gameData.isMarketMaker = roomsData[room].marketMakerID === userID;
           if(gameData.isMarketMaker) {
             gameData.spreadWidth = roomsData[room].spread;
           }
           break;
         case 'trading':
-          gameData.isMarketMaker = roomsData[room].marketMakerId === userID;
+          gameData.isMarketMaker = roomsData[room].marketMakerID === userID;
           if(!gameData.isMarketMaker) {
             gameData.alreadyTraded = roomsData[room].playerTrades[index] !== 0;
             gameData.bidPrice = roomsData[room].bid;
@@ -528,7 +536,7 @@ io.on("connection", socket => {
           break;
       }
     }
-    console.log('giveGameData', gameData, userID);
+    // console.log('giveGameData', gameData, userID);
     io.to(socket.id).emit('giveGameData', gameData);
   });
 

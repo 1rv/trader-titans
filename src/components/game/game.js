@@ -1,4 +1,4 @@
-import { useState , useEffect} from 'react';
+import { useState , useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import React from 'react';
 
@@ -17,7 +17,6 @@ export default function Game(props) {
   //props.usn for username
   //props.room for room
   //props.id for old socketid
-  //this actually sucks and I should figure out a better way to do this
   const [state, setState] = useState(3);
   const [bidPrice, setBidPrice] = useState(0);
   const [askPrice, setAskPrice] = useState(0);
@@ -28,10 +27,12 @@ export default function Game(props) {
   const [officialSpread, setOfficialSpread] = useState(0);
   const [waitingFor, setWaitingFor] = useState('round');
   const [myDiff, setMyDiff] = useState(0);
+  const [gameUsername, setGameUsername] = useState(props.usn);
 
   socket.emit("requestRoom", props.room);
 
 
+  const userID = props.id;
   
   //trade parseInt for parseDouble
   const bid = () => {
@@ -40,7 +41,7 @@ export default function Game(props) {
       toast.error('couldn\'t parse spread bid');
       return;
     } else {
-      socket.emit('bid', parseInt(mySpread), props.usn, userID);
+      socket.emit('bid', parseInt(mySpread), userID);
     }
   }
 
@@ -53,7 +54,7 @@ export default function Game(props) {
   }
 
   const setLine = () => {
-    if(!myBidPrice) {
+    if(!myBidPrice && myBidPrice !== 0) {
       toast.error('couldn\'t parse line');
       return;
     }
@@ -61,34 +62,37 @@ export default function Game(props) {
   }
 
   const playerBuy = () => {
-    socket.emit('playerTrade', 'buy', props.usn, userID);
+    socket.emit('playerTrade', 'buy', userID);
   }
   const playerSell = () => {
-    socket.emit('playerTrade', 'sell', props.usn, userID);
+    socket.emit('playerTrade', 'sell', userID);
   }
 
   var display;
   
   //if behind, update state!
-  const userID = props.id;
-
-  if(props.behind) {
-    socket.emit('getScoreBoardData', userID);
-    socket.emit('getGameData', userID);
-    props.setBehind(false);
-  }
-
+  const behind = props.behind;
+  const setBehind = props.setBehind;
   useEffect(() => {
+    if(behind) {
+      socket.emit('getScoreBoardData', userID);
+      socket.emit('getGameData', userID);
+      setBehind(false);
+    }
+  }, [behind, setBehind, userID, socket]);
 
+
+  const setRoom = props.setRoom;
+  useEffect(() => {
     socket.on('scoreBoardData', ({username, score}) => {
       console.log('got scoreboardData');
       setScore(score);
-      props.setUsn(username);
+      setGameUsername(username);
     });
 
     socket.on('giveGameData', (gameData) => {
       const gameState = gameData.state;
-      props.setRoom(gameData.room);
+      setRoom(gameData.room);
       //'setting-topic', 'bidding-down-spread', 
       //'market-maker-setting-line', 'trading', 'round-stats'
       switch(gameState) {
@@ -154,8 +158,8 @@ export default function Game(props) {
       setWaitingFor('other traders');
       setState(3);
     });
-    socket.on('startBuySellPlayer', (mm, bid, ask) => {
-      if(mm !== props.usn) {
+    socket.on('startBuySellPlayer', (mmID, bid, ask) => {
+      if(mmID !== userID) {
         setState(2);
         setBidPrice(bid)
         setAskPrice(ask)
@@ -178,12 +182,12 @@ export default function Game(props) {
       toast.error('spread must be at least 10% smaller');
     });
 
-    socket.on('bidAccepted', (newSpread, username, uID) => {
+    socket.on('bidAccepted', (newSpread, uID) => {
       if(uID === userID) {
         toast.success('bid successful at ' + newSpread);
       }
     });
-  }, [socket]);
+  }, [socket, userID, setRoom]);
 
 
   useEffect(() => {
@@ -209,11 +213,13 @@ export default function Game(props) {
     //  }
     //});
     display =
-      <p>
+      <>
         <h1>Bid:</h1>
-        <input id="newSpread" type="text" placeholder="your bid" value={mySpread} onChange={e=> setMySpread(e.target.value)}/>
-        <Button variant="primary" onClick = {bid}>Bid</Button>
-      </p>
+        <p>
+          <input id="newSpread" type="text" placeholder="your bid" value={mySpread || ''} onChange={e=> setMySpread(e.target.value)}/>
+          <Button variant="primary" onClick = {bid}>Bid</Button>
+        </p>
+      </>
   } else if (state === 1) {
     //officially the market maker
     //fix this with parseint.
@@ -224,11 +230,13 @@ export default function Game(props) {
     //  setState(3);
     //});
     display = 
-      <p>
+      <>
         <h1>{myBidPrice} @ {myAskPrice}</h1>
-        <input id="Bid Price" type="text" placeholder="Bid Price" autoFocus='true' onChange={e=> updateLine(e.target.value)}/> 
-        <Button variant="primary" onClick = {setLine}>Confirm</Button>
-      </p>
+        <p>
+          <input id="Bid Price" type="text" placeholder="Bid Price" autoFocus={true} onChange={e=> updateLine(e.target.value)}/> 
+          <Button variant="primary" onClick = {setLine}>Confirm</Button>
+        </p>
+      </>
   } else if (state === 2) {
     //buying and selling
     //socket.on('tradeRecievedPlayer', () => {
@@ -236,13 +244,15 @@ export default function Game(props) {
     //  setState(3);
     //});
     display = 
-      <p>
+      <>
         <h2>{bidPrice}@{askPrice}</h2>
-        (You can <b>sell to</b> the market maker at {bidPrice} or <b>buy from</b> the market maker at {askPrice})
-        <br></br>
-        <Button variant="primary" onClick = {playerSell}>Sell</Button>
-        <Button variant="primary" onClick = {playerBuy}>Buy</Button>
-      </p>
+        <p>
+          (You can <b>sell to</b> the market maker at {bidPrice} or <b>buy from</b> the market maker at {askPrice})
+          <br></br>
+          <Button variant="primary" onClick = {playerSell}>Sell</Button>
+          <Button variant="primary" onClick = {playerBuy}>Buy</Button>
+        </p>
+      </>
   } else if (state === 3) {
     //waiting room
     //socket.on('startBuySellPlayer', (mm, bid, ask) => {
@@ -284,7 +294,7 @@ export default function Game(props) {
   return (
     <>
       {display}
-      <Scorebar scr={score} usn={props.usn}/>
+      <Scorebar scr={score} usn={gameUsername}/>
     </>
   )
 }

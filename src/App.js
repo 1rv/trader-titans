@@ -170,7 +170,7 @@ function App() {
       const userElements = users.map((userData, index) => (
         <span 
           key={index} 
-          class="underline-on-hover" 
+          className="underline-on-hover" 
           onClick = {() => kickPlayer(userData[0])}
         > 
           {userData[1]} 
@@ -192,12 +192,12 @@ function App() {
   if (state === 0) {
     inputs = 
       <>
-        <input id="code" type="text" placeholder="type room code" autoFocus='true' 
+        <input id="code" type="text" placeholder="type room code" autoFocus={true}
           value={code} onChange={e=>setCode(e.target.value)}
           maxLength="10"
         />
         <br></br>
-        <span class='nowrap'>
+        <span className='nowrap'>
         <Button variant="primary" onClick = {joinRoom} >Join Room</Button>
         <Button variant="primary" onClick = {createRoom}>Create Room</Button>
         </span>
@@ -222,9 +222,9 @@ function App() {
   } else if (state === 2) {
     inputs = 
       <>
-        <input id="name" type="text" placeholder="type username" autoFocus='true' value={username}
-          onChange={e=> setUsername(e.target.value)}
-          maxlength="15"
+        <input id="name" type="text" placeholder="type username" autoFocus={true} value={username}
+          onChange={e=>setUsername(e.target.value)}
+          maxLength="15"
         />
         <Button variant="primary" onClick = {joinRoomFinal}>Join Room</Button>
         <br></br>
@@ -263,8 +263,8 @@ function App() {
 
 
   return (
-    <div class="App">
-      <header class="App-header">
+    <div className="App">
+      <header className="App-header">
         <Toaster
           toastOptions = {{
             error: {
