@@ -83,6 +83,7 @@ const RulesContainer = styled.div`
     text-transform: uppercase;
     text-align: left;
     line-height: 0.5rem;
+    padding: 2.5rem 0rem;
   }
   
   h3 {
@@ -92,11 +93,13 @@ const RulesContainer = styled.div`
     text-transform: uppercase;
     text-align: left;
     line-height: 0.1rem;
+    padding: 0.5rem 0rem;
   }
   h4 {
     font-size: 1rem;
     font-weight: 100;
     color: black;
     text-align: left;
+    padding: 0.3rem 0rem 1rem 0.5rem;
   }
 `;

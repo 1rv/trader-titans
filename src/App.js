@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
+import { Button, Input, Stack, Heading, Text } from '@chakra-ui/react'
 
 //import logo from './logo.svg';
 import './App.css';
@@ -41,6 +41,7 @@ function App() {
       toast.error('room code cannot be empty');
       return;
     }
+    setUserDisp('')
     socket.emit("room-start", code, socket.userID)
     //socket.on('roomStartSuccess', () => {
     //  setState(1)
@@ -173,10 +174,12 @@ function App() {
           className="underline-on-hover" 
           onClick = {() => kickPlayer(userData[0])}
         > 
+        <Text fontSize='3xl'>
           {userData[1]} 
+        </Text>
         </span>
       ));
-      return userElements
+      return <div className="user-list">{userElements}</div>;
     }
 
     const kickPlayer = (id) => {
@@ -192,14 +195,16 @@ function App() {
   if (state === 0) {
     inputs = 
       <>
-        <input id="code" type="text" placeholder="type room code" autoFocus={true}
+        <Input size='lg' variant='outline' width='250px' id="code" type="text" placeholder="type room code" _placeholder={{color: '#D8DEE9'}} autoFocus={true}
           value={code} onChange={e=>setCode(e.target.value)}
           maxLength="10"
         />
         <br></br>
         <span className='nowrap'>
-        <Button variant="primary" onClick = {joinRoom} >Join Room</Button>
-        <Button variant="primary" onClick = {createRoom}>Create Room</Button>
+        <Stack spacing={0} direction='row' align='center'>
+          <Button size='md' width='125px' variant="solid" colorScheme='blue' onClick = {joinRoom} >Join Room</Button>
+          <Button size='md' width='125px' variant="solid" colorScheme='purple' onClick = {createRoom}>Create Room</Button>
+        </Stack>
         </span>
         <br></br>
         <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
@@ -212,21 +217,21 @@ function App() {
 
     inputs = 
       <>
-        <h1>Game Code: {code}</h1><br></br>
-        <h1>Players:</h1><br></br>
+        <Heading as='h1' size='4xl' noOfLines={1} p='10px' mb='40px'>Game Code: {code}</Heading><br></br>
+        <Heading as='h2' size='2xl' noOfLines={1} p='10px' mb='20px'>Players:</Heading><br></br>
         {userDisp}
         <br></br>
-        <Button variant="primary" onClick = {startGame}>Start Game</Button>
+        <Button size='md' width='125px' variant='solid' colorScheme='blue' onClick = {startGame} mt='20px'>Start Game</Button>
         <br></br>
       </>
   } else if (state === 2) {
     inputs = 
       <>
-        <input id="name" type="text" placeholder="type username" autoFocus={true} value={username}
+        <Input id="name" type="text" width='250px' placeholder="type username" _placeholder={{color: '#D8DEE9'}} autoFocus={true} value={username}
           onChange={e=>setUsername(e.target.value)}
           maxLength="15"
         />
-        <Button variant="primary" onClick = {joinRoomFinal}>Join Room</Button>
+        <Button size='md' width='125px' variant="solid" colorScheme='blue' onClick = {joinRoomFinal}>Join Room</Button>
         <br></br>
         <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
+import { Button, Input, Heading, Text } from '@chakra-ui/react';
 
 
 import SocketContext from "../../socket";
@@ -162,9 +162,9 @@ export default function Admin(props) {
   if (adminState === 0) {
     display = 
       <>
-        <h1>Topic:</h1>
-        <input id="topic" type="text" placeholder="topic" autoFocus={true} value={topic} onChange={e=> setTopic(e.target.value)}/>
-        <Button variant="primary" onClick = {startBidding}>Start Bidding</Button>
+        <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Topic:</Heading>
+        <Input size='lg' variant='outline' width='250px' _placeholder={{color: '#D8DEE9'}} id="topic" type="text" placeholder="topic" autoFocus={true} value={topic} onChange={e=> setTopic(e.target.value)}/>
+        <Button size = 'md' width='125px' variant="solid" colorScheme = 'blue' onClick = {startBidding}>Start Bidding</Button>
       </>
   } else if (adminState === 1) {
     //socket.on('bidAccepted', (newSpread, username) => {
@@ -174,10 +174,10 @@ export default function Admin(props) {
     //});
     display = 
       <>
-        <h1>Topic: {topic}</h1>
-        <h1>Spread: <code>{spread === 9007199254740991 ? '-' : spread}</code></h1> 
-        <h1>By: <code>{marketMaker}</code></h1>
-        <Button variant='primary' onClick = {startLineSetting}>Confirm Market Maker</Button>
+        <Heading as='h1' size='4xl' noOfLines={3} p='50px'>Topic: {topic}</Heading>
+        <Heading as='h2' size='2xl' noOfLines={1} p='30px'>Spread: <code>{spread === 9007199254740991 ? '-' : spread}</code></Heading> 
+        <Heading as='h2' size='2xl' noOfLines={1} p='10px'>By: <code>{marketMaker}</code></Heading>
+        <Button size='md' width='125px' variant='solid' colorScheme='blue' onClick = {startLineSetting} mb='50px'>End Bidding</Button>
       </>
   } else if (adminState === 2) {
     //socket.on('lineSetAdmin', (bid, ask) => {
@@ -196,12 +196,12 @@ export default function Admin(props) {
     //});
     display = 
       <>
-        <h1>Topic: {topic}</h1>
-        <h1>{waitingFor}</h1>
-        <h2>{marketString}</h2>
-        <h2>{traderString}</h2>
-        <input id="Resolve Price" type="text" placeholder="Resolve Price" autoFocus={true} onChange={e=> setResolvePrice(e.target.value)}/> 
-        <Button variant="primary" onClick = {tradingDone}>Resolve</Button>
+        <Heading as='h1' size='4xl' noOfLines={3} p='50px'>Topic: {topic}</Heading>
+        <Heading as='h2' size='2xl' noOfLines={1} p='30px'>{waitingFor}</Heading>
+        <Heading as='h3' size='lg' noOfLines={1} p='10px'>{marketString}</Heading>
+        <Heading as='h3' size='lg' noOfLines={1} p='10px'>{traderString}</Heading>
+        <Input size='lg' variant='outline' width='250px' _placeholder={{color: '#D8DEE9'}} id="Resolve Price" type="text" placeholder="Resolve Price" autoFocus={true} onChange={e=> setResolvePrice(e.target.value)}/> 
+        <Button size='md' width='125px' variant="solid" colorScheme='blue' onClick = {tradingDone}>Resolve</Button>
       </>
   } else if (adminState === 3) {
     //socket.on('restartRoundAdmin', () => {
@@ -220,26 +220,26 @@ export default function Admin(props) {
       <br></br>
       sells: {roundStats[1]}
       <br></br>
-      Market Maker ({marketMaker}) PnL: {roundStats[2]}
+      <Text p='20px'> Market Maker ({marketMaker}) PnL: {roundStats[2]} </Text>
       <br></br>
-      <Button variant="primary" onClick = {restartRound}>Next Round</Button>
+      <Button size='md' width='125px' variant="solid" colorScheme='purple' onClick = {restartRound}>Next Round</Button>
     </>
     if (n === 2) {
       display =
         <>
-          <h1>Leaderboard</h1>
+          <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
           {topFive[0].username}:  {topFive[0].score}
           <br></br>
           {topFive[1].username}:  {topFive[1].score}
           <br></br>
           <br></br>
-          <h2>Round Stats:</h2>
+          <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
           {common}
         </>
     } else if (n === 3) {
       display =
         <>
-          <h1>Leaderboard</h1>
+          <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
           {topFive[0].username}:  {topFive[0].score}
           <br></br>
           {topFive[1].username}:  {topFive[1].score}
@@ -247,13 +247,13 @@ export default function Admin(props) {
           {topFive[2].username}:  {topFive[2].score}
           <br></br>
           <br></br>
-          <h2>Round Stats:</h2>
+          <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
           {common}
         </>
     } else if (n === 4) {
       display =
         <>
-          <h1>Leaderboard</h1>
+          <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
           {topFive[0].username}:  {topFive[0].score}
           <br></br>
           {topFive[1].username}:  {topFive[1].score}
@@ -263,13 +263,13 @@ export default function Admin(props) {
           {topFive[3].username}:  {topFive[3].score}
           <br></br>
           <br></br>
-          <h2>Round Stats:</h2>
+          <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
           {common}
         </>
     } else {
       display =
         <>
-          <h1>Leaderboard</h1>
+          <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
           {topFive[0].username}:  {topFive[0].score}
           <br></br>
           {topFive[1].username}:  {topFive[1].score}
@@ -281,7 +281,7 @@ export default function Admin(props) {
           {topFive[4].username}:  {topFive[4].score}
           <br></br>
           <br></br>
-          <h2>Round Stats:</h2>
+          <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
           {common}
         </>
     }

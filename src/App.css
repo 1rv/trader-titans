@@ -45,3 +45,18 @@
     text-decoration: line-through;
     cursor: pointer;
 }
+
+.startButtons {
+    padding-top:5px;
+}
+
+.user-list {
+  display: flex;
+  flex-wrap: wrap; /* Allows items to wrap to the next line */
+  justify-content: center;
+  gap: 10px; /* Adds some space between items, adjust as needed */
+}
+
+.user-item {
+  margin: 5px; /* Optional: Adds some margin around each item */
+}

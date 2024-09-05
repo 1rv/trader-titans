@@ -1,11 +1,12 @@
 import { useState , useEffect } from 'react';
-import Button from 'react-bootstrap/Button';
 import React from 'react';
 
 import Scorebar from '../scorebar/scorebar.js';
 import toast from 'react-hot-toast';
 
 import SocketContext from "../../socket";
+
+import { Input, Button, Text, Heading, Stack } from '@chakra-ui/react';
 
 //import loading circle
 
@@ -214,10 +215,10 @@ export default function Game(props) {
     //});
     display =
       <>
-        <h1>Bid:</h1>
+        <Heading as='h1' size='4xl' mb='50px'>Bid:</Heading>
         <p>
-          <input id="newSpread" type="text" placeholder="your bid" value={mySpread || ''} onChange={e=> setMySpread(e.target.value)}/>
-          <Button variant="primary" onClick = {bid}>Bid</Button>
+          <Input id="newSpread" type="text" width='250px' placeholder="your bid" _placeholder={{color: '#D8DEE9'}} value={mySpread || ''} onChange={e=> setMySpread(e.target.value)}/>
+          <Button variant="solid" onClick = {bid} colorScheme='blue'>Bid</Button>
         </p>
       </>
   } else if (state === 1) {
@@ -231,10 +232,10 @@ export default function Game(props) {
     //});
     display = 
       <>
-        <h1>{myBidPrice} @ {myAskPrice}</h1>
+        <Heading as='h1' size='4xl' p='50px'>{myBidPrice} @ {myAskPrice}</Heading>
         <p>
-          <input id="Bid Price" type="text" placeholder="Bid Price" autoFocus={true} onChange={e=> updateLine(e.target.value)}/> 
-          <Button variant="primary" onClick = {setLine}>Confirm</Button>
+          <Input id="Bid Price" type="text" width='250px' placeholder="Bid Price" _placeholder={{color: '#D8DEE9'}}  autoFocus={true} onChange={e=> updateLine(e.target.value)}/> 
+          <Button variant="solid" onClick = {setLine} colorScheme='blue'>Confirm</Button>
         </p>
       </>
   } else if (state === 2) {
@@ -245,13 +246,15 @@ export default function Game(props) {
     //});
     display = 
       <>
-        <h2>{bidPrice}@{askPrice}</h2>
+        <Heading as='h2' size='2xl' p='50px'>{bidPrice}@{askPrice}</Heading>
         <p>
           (You can <b>sell to</b> the market maker at {bidPrice} or <b>buy from</b> the market maker at {askPrice})
-          <br></br>
-          <Button variant="primary" onClick = {playerSell}>Sell</Button>
-          <Button variant="primary" onClick = {playerBuy}>Buy</Button>
         </p>
+
+        <Stack spacing={0} direction='row' align='center' p='20px'>
+          <Button variant="solid" colorScheme='red' onClick = {playerSell}>Sell</Button>
+          <Button variant="solid" colorScheme='green' onClick = {playerBuy}>Buy</Button>
+        </Stack>
       </>
   } else if (state === 3) {
     //waiting room
