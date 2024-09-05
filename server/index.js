@@ -100,8 +100,7 @@ io.on("connection", socket => {
     }
   }
 
-  console.log("inferredState after calculation", inferredState);
-  console.log(socket.userID);
+  console.log("inferredState after calculation", inferredState, socket.userID);
   socket.emit("session", {
     sessionID: socket.sessionID,
     userID: socket.userID,
@@ -283,8 +282,6 @@ io.on("connection", socket => {
       }
     } else {
       console.log("tried to join an unitiated room, username: ", username); 
-      console.log(rooms);
-      console.log(room);
     }
   });
 
@@ -365,10 +362,7 @@ io.on("connection", socket => {
     let diffs = new Array(roomsData[room].leaderboard.length).fill(0);
     let buys = 0;
     let sells = 0;
-    console.log(roomsData[room].playerTrades);
     for (let i = 0; i < roomsData[room].playerTrades.length; i++) { //playerTrades length should be same as leaderboard...
-      console.log(i, roomsData[room].playerTrades[i]);
-      console.log(roomsData[room].userIDToGameIndex[roomsData[room].marketMakerID]);
       if (i === roomsData[room].userIDToGameIndex[roomsData[room].marketMakerID]) {
         mmIndex = i;
         console.log('mm');
@@ -424,7 +418,7 @@ io.on("connection", socket => {
     //change these to be to the room
     io.to(room).emit('roundResultsPlayer', idDiff);
     socket.emit('roundResultsAdmin', topFive.slice(0, Math.min(topFive.length, 5)), [buys, sells, mmdiff], roomsData[room].marketMaker);
-    console.log(topFive.slice(0, Math.min(topFive.length, 5)));
+    // console.log(topFive.slice(0, Math.min(topFive.length, 5)));
   });
 
   socket.on('restartRound', (adminID) => {
