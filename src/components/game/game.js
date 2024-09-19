@@ -40,16 +40,16 @@ export default function Game(props) {
   //trade parseInt for parseDouble
   const bid = () => {
     let tempMySpread = mySpread;
-    if (!tempMySpread.match(/^[0-9]*$/) || isNaN(parseInt(tempMySpread))) {
+    if (!tempMySpread.match(/^[0-9]*\.?[0-9]+$/) || isNaN(parseFloat(tempMySpread))) {
       toast.error('couldn\'t parse spread bid');
       return;
     } else {
-      socket.emit('bid', parseInt(mySpread), userID);
+      socket.emit('bid', parseFloat(mySpread), userID);
     }
   }
 
   const updateLine = (bidPrice) => {
-    let bp = parseInt(bidPrice);
+    let bp = parseFloat(bidPrice);
     if (!isNaN(bp)) {
       setMyBidPrice(bp);
       setMyAskPrice(bp+officialSpread);
@@ -234,7 +234,7 @@ export default function Game(props) {
     //});
     display = 
       <>
-        <Heading as='h1' size='4xl' p='50px'>{myBidPrice} @ {myAskPrice}</Heading>
+        <Heading as='h1' size='4xl' p='50px'>{formatScore(myBidPrice)} @ {formatScore(myAskPrice)}</Heading>
         <p>
           <Input id="Bid Price" type="text" width='250px' placeholder="Bid Price" _placeholder={{color: '#D8DEE9'}}  autoFocus={true} onChange={e=> updateLine(e.target.value)}/> 
           <Button variant="solid" onClick = {setLine} colorScheme='blue'>Confirm</Button>
@@ -248,9 +248,9 @@ export default function Game(props) {
     //});
     display = 
       <>
-        <Heading as='h2' size='2xl' p='50px'>{bidPrice}@{askPrice}</Heading>
+        <Heading as='h2' size='2xl' p='50px'>{formatScore(bidPrice)}@{formatScore(askPrice)}</Heading>
         <p>
-          (You can <b>sell to</b> the market maker at {bidPrice} or <b>buy from</b> the market maker at {askPrice})
+          (You can <b>sell to</b> the market maker at {formatScore(bidPrice)} or <b>buy from</b> the market maker at {formatScore(askPrice)})
         </p>
 
         <Stack spacing={0} direction='row' align='center' p='20px'>

@@ -59,7 +59,7 @@ export default function Admin(props) {
           break;
         case 'trading':
           setWaitingFor('Waiting for Traders...');
-          setMarketString("Market: "+ gameData.bidPrice + "@" + gameData.askPrice);
+          setMarketString("Market: "+ formatScore(gameData.bidPrice) + "@" + formatScore(gameData.askPrice));
           //TODO: figure out why setBidPrice not working
           setTraderString(gameData.tradesCt + " out of " + gameData.traderCt + " trades processed");
           setAdminState(2);
@@ -145,7 +145,7 @@ export default function Admin(props) {
       return;
     }
 
-    let rp = parseInt(resolvePrice);
+    let rp = parseFloat(resolvePrice);
     if (!isNaN(rp)) {
       socket.emit('tradingDone', rp, props.id);
     } else {
@@ -221,7 +221,7 @@ export default function Admin(props) {
       <br></br>
       sells: {roundStats[1]}
       <br></br>
-      <Text p='20px'> Market Maker ({marketMaker}) PnL: {roundStats[2]} </Text>
+      <Text p='20px'> Market Maker ({marketMaker}) PnL: {formatScore(roundStats[2])} </Text>
       <br></br>
       <Button size='md' width='125px' variant="solid" colorScheme='purple' onClick = {restartRound}>Next Round</Button>
     </>
