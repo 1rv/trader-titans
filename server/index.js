@@ -508,7 +508,8 @@ io.on("connection", socket => {
           gameData.traderCt = roomsData[room].traderCt;
           break;
         case 'round-stats':
-          gameData.topFive = [...roomsData[room].leaderboard];
+          let gameDataScores = [...roomsData[room].leaderboard].sort((p1, p2) => p2.score - p1.score);
+          gameData.topFive = gameDataScores.slice(0, Math.min(gameDataScores.length, 5));
           gameData.buys = roomsData[room].buys;
           gameData.sells = roomsData[room].sells;
           gameData.mmdiff = roomsData[room].mmdiff;

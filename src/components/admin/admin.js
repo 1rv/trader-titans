@@ -214,9 +214,8 @@ export default function Admin(props) {
     //  setMarketString('')
     //});
     //there must be a better way of doing this
-    let n = topFive.length;
 
-    let common = <>
+    let roundData = <>
       <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
       buys: {roundStats[0]}
       <br></br>
@@ -238,7 +237,7 @@ export default function Admin(props) {
     display = <>
       <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
       {scoreDisp}
-      {common}
+      {roundData}
     </>
   }
 
