@@ -100,7 +100,6 @@ io.on("connection", socket => {
     }
   }
 
-  console.log("inferredState after calculation", inferredState, socket.userID);
   socket.emit("session", {
     sessionID: socket.sessionID,
     userID: socket.userID,
@@ -168,8 +167,7 @@ io.on("connection", socket => {
       io.to(socket.id).emit('roomNameTaken');
     } else {
       setHeartbeatTimeout(userID);
-      console.log('start heartbeat for', room);
-      console.log(userID);
+      console.log('start heartbeat for', room, userID);
 
       let roomData = {
         admin : userID,
@@ -362,12 +360,25 @@ io.on("connection", socket => {
     let diffs = new Array(roomsData[room].leaderboard.length).fill(0);
     let buys = 0;
     let sells = 0;
+    let noTradePenalty = (-1)*roomsData[room].spread*0.5;
+    for (let i = 0; i < roomsData[room].playerTrades.length; i++) { //playerTrades length should be same as leaderboard...
+      if (roomsData[room].playerTrades[i] === 1) { //Buys
+        let pnl = resolvePrice - roomsData[room].ask;
+        if (pnl < noTradePenalty) {
+          noTradePenalty = pnl;
+        }
+      } else if (roomsData[room].playerTrades[i] === 2) { //Sells
+        let pnl = roomsData[room].bid - resolvePrice;
+        if (pnl < noTradePenalty) {
+          noTradePenalty = pnl;
+        }
+      }
+    }
+
     for (let i = 0; i < roomsData[room].playerTrades.length; i++) { //playerTrades length should be same as leaderboard...
       if (i === roomsData[room].userIDToGameIndex[roomsData[room].marketMakerID]) {
         mmIndex = i;
-        console.log('mm');
       } else if (roomsData[room].playerTrades[i] === 1) { //Buys
-        console.log('buy');
         let pnl = resolvePrice - roomsData[room].ask;
         roomsData[room].leaderboard[i].score += pnl;
         //may not need this next line
@@ -377,21 +388,19 @@ io.on("connection", socket => {
         buys += 1;
         diffs[i] = pnl;
       } else if (roomsData[room].playerTrades[i] === 2) { //Sells
-        console.log('sell');
         let pnl = roomsData[room].bid - resolvePrice;
         roomsData[room].leaderboard[i].score += pnl;
         //may not need this next line
-        roomsData[room].playerRoundScores[i] += (pnl);
+        roomsData[room].playerRoundScores[i] += pnl;
         roomsData[room].playerScores[i] += pnl;
         mmdiff -= pnl;
-        diffs[i] = pnl;
         sells += 1;
+        diffs[i] = pnl;
       } else {
-        console.log('nothing');
         //didn't play... lose 10%
-        roomsData[room].leaderboard[i].score -= (roomsData[room].spread*0.1);
-        roomsData[room].playerRoundScores[i] -= (roomsData[room].spread*0.1);
-        diffs[i] = (-1)*roomsData[room].spread*0.05;
+        roomsData[room].leaderboard[i].score += noTradePenalty;
+        roomsData[room].playerRoundScores[i] += noTradePenalty;
+        diffs[i] = noTradePenalty;
       }
     }
     roomsData[room].leaderboard[mmIndex].score += mmdiff;

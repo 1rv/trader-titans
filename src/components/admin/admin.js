@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Input, Heading, Text } from '@chakra-ui/react';
 
+import { formatScore } from '../../utils/formatting.js'
 
 import SocketContext from "../../socket";
 import React from 'react';
@@ -216,6 +217,7 @@ export default function Admin(props) {
     let n = topFive.length;
 
     let common = <>
+      <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
       buys: {roundStats[0]}
       <br></br>
       sells: {roundStats[1]}
@@ -224,67 +226,20 @@ export default function Admin(props) {
       <br></br>
       <Button size='md' width='125px' variant="solid" colorScheme='purple' onClick = {restartRound}>Next Round</Button>
     </>
-    if (n === 2) {
-      display =
-        <>
-          <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
-          {topFive[0].username}:  {topFive[0].score}
+
+    let scoreDisp = <>
+      {topFive.map((player, index) => (
+        <div key={index}>
+          {player.username}: {formatScore(player.score)}
           <br></br>
-          {topFive[1].username}:  {topFive[1].score}
-          <br></br>
-          <br></br>
-          <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
-          {common}
-        </>
-    } else if (n === 3) {
-      display =
-        <>
-          <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
-          {topFive[0].username}:  {topFive[0].score}
-          <br></br>
-          {topFive[1].username}:  {topFive[1].score}
-          <br></br>
-          {topFive[2].username}:  {topFive[2].score}
-          <br></br>
-          <br></br>
-          <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
-          {common}
-        </>
-    } else if (n === 4) {
-      display =
-        <>
-          <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
-          {topFive[0].username}:  {topFive[0].score}
-          <br></br>
-          {topFive[1].username}:  {topFive[1].score}
-          <br></br>
-          {topFive[2].username}:  {topFive[2].score}
-          <br></br>
-          {topFive[3].username}:  {topFive[3].score}
-          <br></br>
-          <br></br>
-          <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
-          {common}
-        </>
-    } else {
-      display =
-        <>
-          <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
-          {topFive[0].username}:  {topFive[0].score}
-          <br></br>
-          {topFive[1].username}:  {topFive[1].score}
-          <br></br>
-          {topFive[2].username}:  {topFive[2].score}
-          <br></br>
-          {topFive[3].username}:  {topFive[3].score}
-          <br></br>
-          {topFive[4].username}:  {topFive[4].score}
-          <br></br>
-          <br></br>
-          <Heading as='h2' size='2xl' noOfLines={1} p='20px'>Round Stats:</Heading>
-          {common}
-        </>
-    }
+        </div>
+      ))}
+    </>
+    display = <>
+      <Heading as='h1' size='4xl' noOfLines={1} p='50px'>Leaderboard</Heading>
+      {scoreDisp}
+      {common}
+    </>
   }
 
   return (

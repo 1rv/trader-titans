@@ -6,7 +6,9 @@ import toast from 'react-hot-toast';
 
 import SocketContext from "../../socket";
 
-import { Input, Button, Text, Heading, Stack } from '@chakra-ui/react';
+import { Input, Button, Heading, Stack } from '@chakra-ui/react';
+
+import { formatScore } from '../../utils/formatting.js'
 
 //import loading circle
 
@@ -289,7 +291,7 @@ export default function Game(props) {
     //});
     display = 
       <p>
-        Score Change: {myDiff}
+        Score Change: {formatScore(myDiff)}
       </p>
   }
 

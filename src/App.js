@@ -199,15 +199,13 @@ function App() {
           value={code} onChange={e=>setCode(e.target.value)}
           maxLength="10"
         />
-        <br></br>
         <span className='nowrap'>
         <Stack spacing={0} direction='row' align='center'>
           <Button size='md' width='125px' variant="solid" colorScheme='blue' onClick = {joinRoom} >Join Room</Button>
           <Button size='md' width='125px' variant="solid" colorScheme='purple' onClick = {createRoom}>Create Room</Button>
         </Stack>
         </span>
-        <br></br>
-        <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
+        <Heading as='h4' size='lg' p='20px' noOfLines={2}>Play <code>Trader Titans!</code> Enter a game code to join a game or start a new game.</Heading>
       </>
   } else if (state === 1) {
     //admin
