@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button, Input, Stack, Heading, Text } from '@chakra-ui/react'
 
 //import logo from './logo.svg';
+import logofull from './logofull.png';
 import './App.css';
 
 //import components
@@ -191,6 +192,22 @@ function App() {
 
 
   var inputs;
+  const logo = 
+      <img
+        src={logofull}
+        alt="logo"
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          opacity: 0.4,
+          maxWidth: '75vw',
+          maxHeight: '80vh',
+          objectFit: 'contain',
+          zIndex: 0,
+        }}
+      />;
+  var renderLogo;
   //states
   if (state === 0) {
     inputs = 
@@ -205,8 +222,9 @@ function App() {
           <Button size='md' width='125px' variant="solid" colorScheme='purple' onClick = {createRoom}>Create Room</Button>
         </Stack>
         </span>
-        <Heading as='h4' size='lg' p='20px' noOfLines={2}>Play <code>Trader Titans!</code> Enter a game code to join a game or start a new game.</Heading>
+        <Heading as='h4' size='lg' p='20px' noOfLines={3}>Play <code>Trader Titans!</code> Enter a game code to join or start a new game.</Heading>
       </>
+      renderLogo = logo;
   } else if (state === 1) {
     //admin
     //socket.on('updateUserDisp', users => {
@@ -222,6 +240,7 @@ function App() {
         <Button size='md' width='125px' variant='solid' colorScheme='blue' onClick = {startGame} mt='20px'>Start Game</Button>
         <br></br>
       </>
+      renderLogo = logo;
   } else if (state === 2) {
     inputs = 
       <>
@@ -233,6 +252,7 @@ function App() {
         <br></br>
         <p>Play <code>Trader Titans</code>! Enter a game code or start a new game.</p>
       </>
+      renderLogo = logo;
   } else if (state === 3) {
     //socket.on('gameStartedPlayer', () => {
     //  setState(5);
@@ -241,6 +261,7 @@ function App() {
       <>
         See your name on the board? Get ready to play!
       </>
+    renderLogo = logo;
   } else if (state === 4) {
     inputs =
       <Admin 
@@ -250,6 +271,7 @@ function App() {
         behind={clientIsBehind}
         setBehind={setClientIsBehind}
       />;
+    renderLogo = null;
   }
   else if (state === 5) {
     inputs =
@@ -262,11 +284,13 @@ function App() {
         behind={clientIsBehind}
         setBehind={setClientIsBehind}
       />;
+    renderLogo = null;
   }
 
 
   return (
     <div className="App">
+      <div className="App-wrapper">
       <header className="App-header">
         <Toaster
           toastOptions = {{
@@ -290,7 +314,9 @@ function App() {
         <Rules/>
         <a href="https://github.com/1rv/trader-titans" style={{ position: 'absolute', top: '4%', left: '2%' }}><img src={githubIcon} alt = "github" height='75%' width='75%'/></a>
       </header>
-    </div>
+      </div>
+    {renderLogo}
+  </div>
   );
 }
 
